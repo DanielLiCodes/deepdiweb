@@ -35,7 +35,7 @@ export default new Router({
     } */
     {
       path: '*',
-      redirect: '/odaweb/test'
+      redirect: '/odaweb/strcpy_x86'
     }
   ]
 })

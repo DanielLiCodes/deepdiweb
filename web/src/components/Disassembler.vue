@@ -85,12 +85,6 @@
                   <FileInfo />
                 </div>
               </b-tab>
-              <b-tab lazy title="Call Graph">
-                <div style="position:absolute; top:32px; left:0; right:0; bottom:0; overflow: scroll;">
-                  <CallGraph />
-                </div>
-              </b-tab>
-              
             </b-tabs>
 
             <!-- <SplitBox splitX="600">
@@ -134,7 +128,6 @@ import { mapState } from 'vuex'
 import { copyOdaMaster, canEdit } from '../api/oda'
 import { OPEN_LISTING_TAB, bus } from '../bus'
 
-
 export default {
   name: 'DisassemblerView',
   components: {
@@ -150,7 +143,6 @@ export default {
     UploadFileModal: () => import('@/components/modals/UploadFileModal'),
     ConfigureUploadModal: () => import('@/components/modals/ConfigureUploadModal'),
     GraphView: () => import('@/components/tabs/GraphView'),
-    CallGraph: () => import('@/components/tabs/CallGraph'),
     SharingModal: () => import('@/components/modals/SharingModal'),
     StatusBar: () => import('./StatusBar'),
     CommentModal: () => import('@/components/modals/CommentModal'),

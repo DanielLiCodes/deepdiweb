@@ -11,13 +11,7 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
-      '/odaweb': {
-        target: 'http://localhost:8001',
-        bypass: function (req, res, option) {
-          if (req.path.split('/').length === 3)
-            return '/index.html';
-        }
-      }
+      '/odaweb': 'http://localhost:8001'
     },
 
     // Various Dev Server settings
