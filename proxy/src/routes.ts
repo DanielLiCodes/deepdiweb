@@ -6,7 +6,7 @@ import { generate_id } from './util';
 import load from './routes/load';
 import path from 'path';
 import upload from './routes/upload';
-import { EXAMPLES, EXAMPLE_NAMES } from '../dist/examples';
+import { EXAMPLES, EXAMPLE_NAMES } from './examples/examples';
 import disassemble, { disassemble_bytes } from './routes/disassemble';
 
 const router = Router();
@@ -29,8 +29,9 @@ router.get('/api/masters/:short_name/clone', async (req, res) => {
     try {
         const example = EXAMPLES.find(e => e.name === short_name);
         if (example) {
-            const file_path = `${UPLOAD_DIR}/${new_short_name}`;
+            const file_path = `${UPLOAD_DIR}${new_short_name}`;
             await fs.writeFile(file_path, example.bytes);
+
             add_project(new_short_name, {
                 project_name: new_short_name,
                 file_path,
