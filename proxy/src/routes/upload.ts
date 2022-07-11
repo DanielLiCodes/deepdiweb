@@ -17,7 +17,7 @@ export default async function upload(req: Request, res: Response) {
 
         // create a short_name for the file, and rename the uploaded file to it
         const short_name = generate_id();
-        const file_path = `${UPLOAD_DIR}/${short_name}`;
+        const file_path = `${UPLOAD_DIR}${short_name}`;
         await fs.rename(file.tempFilePath, file_path);
         add_project(short_name, {
             project_name: file.name || project_name || short_name,
@@ -27,7 +27,6 @@ export default async function upload(req: Request, res: Response) {
             arch,
             mode
         });
-
         res.status(200).json({ short_name });
 
         // remove any files past our upload limit

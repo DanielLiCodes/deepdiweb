@@ -86,10 +86,15 @@
                   <FileInfo />
                 </div>
               </b-tab>
+              <b-tab title="C Code">
+                <div style="position:absolute; top:32px; left:0; right:0; bottom:0; overflow: scroll;">
+                  <CCode/>
+                </div>
+              </b-tab>
               <KeepAlive>
               <b-tab title="Call Graph">
                 <div style="position:absolute; top:32px; left:0; right:0; bottom:0; overflow: scroll;">
-                  <div v-if="visitedTabs.includes(5)">
+                  <div v-if="visitedTabs.includes(6)">
                     <CallGraph/>
                   </div>
                 </div>
@@ -151,6 +156,7 @@ export default {
     FileInfo: () => import('@/components/tabs/FileInfo'),
     Sections: () => import('@/components/tabs/Sections'),
     HexView: () => import('@/components/tabs/HexView'),
+    CCode: () => import('@/components/tabs/CCode'),
     LiveEntry: () => import('./sidebar/LiveEntry'),
     UploadFileModal: () => import('@/components/modals/UploadFileModal'),
     ConfigureUploadModal: () => import('@/components/modals/ConfigureUploadModal'),

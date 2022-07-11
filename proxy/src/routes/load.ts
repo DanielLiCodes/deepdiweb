@@ -52,7 +52,7 @@ export default async function load(req: Request, res: Response) {
             architectures: [
                 'armv7', 'x86'
             ],
-            live_mode: project.raw,
+            live_mode: false,
             labels: [],
             comments: [],
             branches: [],
@@ -64,8 +64,8 @@ export default async function load(req: Request, res: Response) {
             functions: [],
             sections: []
         };
-        // info.binary.desc = await file(project.file_path);
-        info.binary.desc = ['PE32+ executable (GUI) x86-64', 'for MS Windows'];
+        info.binary.desc = await file(project.file_path);
+        // info.binary.desc = ['PE32+ executable (GUI) x86-64', 'for MS Windows'];
 
         const tasks = [];
         if (project.raw) {
@@ -93,10 +93,10 @@ export default async function load(req: Request, res: Response) {
                 info.functions = functions;
             }));
         } else if (info.binary.desc.some(x => x.indexOf('PE32') !== -1)) {
-            tasks.push(objdump(project.file_path).then(({ sections, base_address }) => {
-                info.sections = sections;
-                info.binary.base_address = base_address;
-            }));
+            // tasks.push(objdump(project.file_path).then(({ sections, base_address }) => {
+            //     info.sections = sections;
+            //     info.binary.base_address = base_address;
+            // }));
         } else {
             // raw data
 
@@ -240,13 +240,13 @@ async function file(file_path: string): Promise<string[]> {
 }
 
 async function objdump(file_path: string): Promise<{ sections: BinarySection[], base_address: number }> {
-    // const output = await spawn_and_read('objdump', ['-hw', file_path]);
-    const output = `Sections:
-    Idx Name          Size      VMA       LMA       File off  Algn  Flags
-    0 .text         00019bf0  01d01000  01d01000  00000400  2**2  CONTENTS, ALLOC, LOAD, READONLY, CODE
-    1 .data         00002000  01d1b000  01d1b000  0001a000  2**2  CONTENTS, ALLOC, LOAD, DATA
-    2 .rsrc         00000948  01d45000  01d45000  0001c000  2**2  CONTENTS, ALLOC, LOAD, READONLY, DATA
-    3 .reloc        00001c6a  01d46000  01d46000  0001ca00  2**2  CONTENTS, ALLOC, LOAD, READONLY, DATA`;
+    const output = await spawn_and_read('objdump', ['-hw', file_path]);
+    // const output = `Sections:
+    // Idx Name          Size      VMA       LMA       File off  Algn  Flags
+    // 0 .text         00019bf0  01d01000  01d01000  00000400  2**2  CONTENTS, ALLOC, LOAD, READONLY, CODE
+    // 1 .data         00002000  01d1b000  01d1b000  0001a000  2**2  CONTENTS, ALLOC, LOAD, DATA
+    // 2 .rsrc         00000948  01d45000  01d45000  0001c000  2**2  CONTENTS, ALLOC, LOAD, READONLY, DATA
+    // 3 .reloc        00001c6a  01d46000  01d46000  0001ca00  2**2  CONTENTS, ALLOC, LOAD, READONLY, DATA`;
     const lines = output.split('\n');
 
     const sections: BinarySection[] = [];

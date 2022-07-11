@@ -13,6 +13,7 @@ export function add_project(key: string, info: ProjectInfo) {
             Projects.delete(name);
         }
     }
+    console.log("proj added at" + key)
 }
 
 export function get_project(key: string): ProjectInfo | undefined {

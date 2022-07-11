@@ -2,11 +2,44 @@ import { promises as fs } from 'fs';
 import { get_project } from '../database';
 import { Request, Response } from 'express';
 import axios, { AxiosError } from 'axios';
+import { promisify } from 'util'
 import FormData from 'form-data';
+import { exec,execSync, spawn, execFileSync, spawnSync } from 'child_process';
+
 
 const cs = require('@alexaltea/capstone-js/dist/capstone.min.js');
+
 export default async function disassemble(req: Request, res: Response) {
-    
+    try {
+        // var cmd = await spawn('python3', ['src/routes/retdec/bin/retdec-decompiler.py', 'src/examples/JRuler.exe']);
+        // var cmd = await exec('python3 src/routes/retdec/bin/retdec-decompiler.py src/examples/JRuler.exe')
+
+        //  cmd.stdout.on('data', (data:any) => {
+        //     console.log(`stdout: ${data}`);
+        //   });
+        //   cmd.stderr.on('data', (data:any) => {
+        //     console.error(`this.mpvProcess stderr: ${data}`);
+        //   });
+        //   cmd.on('close', (code:any) => {
+        //     console.log(`child process close all stdio with code ${code}`);
+        //   });
+        //   cmd.on('disconnect', () => {
+        //     console.log(`disconnected`);
+        //   });
+        //   cmd.on('exit', () => {
+        //     process.disconnect();
+        // });
+
+        // cmd.on('error', (err) => {
+        //     console.log(`child process error with code ${err}`);
+        // });
+    }
+    catch(error) {
+        console.log("errrr")
+        console.log(error);
+    }
+   
+
     const short_name = req.params.short_name as string;
     if (!short_name) {
         res.status(400).send('Short name not provided');
@@ -20,7 +53,9 @@ export default async function disassemble(req: Request, res: Response) {
     }
 
     try {
-        if(project.raw){
+        
+
+        if(!project.raw){
             const bytes = await fs.readFile(project.file_path);
 
             //parse the data from bytes into a better form
@@ -55,6 +90,8 @@ export default async function disassemble(req: Request, res: Response) {
             result["data"] = data;
             result["transfer"] = transfer;
             res.status(200).type('json').send(result);
+        } else{
+            
         }
         //current set of data used
         // const form = new FormData();
@@ -87,6 +124,30 @@ export default async function disassemble(req: Request, res: Response) {
         console.log(`An error occured while trying to disassemble.\n${ex}`);
         console.log((ex as AxiosError).response);
         res.status(400).send('Unable to disassemble');
+    }
+}
+export async function disassemble_retdec(req:Request, res:Response){
+    const short_name = req.body.params.short_name.short_name as string;
+    if (!short_name) {
+        res.status(400).send('Short name not provided');
+        return;
+    }
+    const project = get_project(short_name);
+    if (!project) {
+        console.log(short_name);
+        console.log(project);
+        res.status(400).send(`${short_name} not found`);
+        return;
+    }
+    try {
+        var cmd = spawnSync('python3', ['src/routes/retdec/bin/retdec-decompiler.py', project.file_path]);
+        
+        const raw = await fs.readFile(`${project.file_path}.c`)
+
+        res.status(200).send(raw);
+    }
+    catch (ex) {
+        console.log('disasem retdec error route')
     }
 }
 

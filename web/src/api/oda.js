@@ -32,7 +32,19 @@ export async function loadOdbFile () {
     error({ e, message: `loading an odb file ${store.state.shortName}` })
   }
 }
-
+export async function disassembleByRetdec (shortName) {
+  try {
+    console.log(shortName)
+    const response = await odaAxios.post('/odaweb/api/disassembleretdec', {
+      params: {
+        short_name: shortName
+      }
+    })
+    return response.data
+  } catch (e) {
+    error({ e, message: 'disasem by retdec' })
+  }
+}
 // export async function loadDisplayUnits (addr, units) {
 //   console.log('loading display units', addr, units)
 //   try {
@@ -250,7 +262,7 @@ export async function uploadFile ({ filedata, projectName, arch, mode }) {
     formData.append('project_name', projectName)
     formData.append('arch', arch)
     formData.append('mode', mode)
-    const response = await odaAxios.post('/odaweb/_upload', formData)
+    const response = await odaAxios.post('/odaweb/api/upload', formData)
     return response.data
   } catch (e) {
     error({ e, message: e.response.data })

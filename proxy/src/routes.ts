@@ -7,7 +7,8 @@ import load from './routes/load';
 import path from 'path';
 import upload from './routes/upload';
 import { EXAMPLES, EXAMPLE_NAMES } from './examples/examples';
-import disassemble, { disassemble_bytes } from './routes/disassemble';
+import disassemble, { disassemble_bytes, disassemble_retdec } from './routes/disassemble';
+var timeout = require('connect-timeout')
 
 const router = Router();
 
@@ -15,7 +16,7 @@ router.get('/:short_name', async (req, res) => {
     res.sendFile(path.join(__dirname, 'frontend/index.html'));
 });
 
-router.post('/_upload', upload);
+
 
 router.get('/api/masters/:short_name/can_edit', (req, res) => {
     // since we don't support auth, just return whether or not it is an example
@@ -50,9 +51,9 @@ router.get('/api/masters/:short_name/clone', async (req, res) => {
         res.status(400).send(`Unable to copy clone ${short_name} (does that example exist?)`);
     }
 });
-
+router.post('/api/disassembleretdec' , disassemble_retdec);
+router.post('/api/upload', upload);
 router.get('/api/load', load);
 router.post('/api/disassemble_bytes', disassemble_bytes);
 router.post('/api/:short_name/disassemble', disassemble);
-
 export default router;
