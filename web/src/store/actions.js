@@ -21,7 +21,6 @@ import { buildDUs, buildParcels } from '../lib/lib'
 
 export async function loadOdbFile ({ commit, state }) {
   const odbFile = await api.loadOdbFile()
-
   bus.$emit(NOTIFY, {
     text: 'Disassembling...'
   })
@@ -35,7 +34,10 @@ export async function loadOdbFile ({ commit, state }) {
   } else {
     disassemblyTask = api.disassemble(state.shortName)
   }
-
+  let disassemblyTaskRetdec
+  if (odbFile.isexe) {
+    disassemblyTaskRetdec = api.disassembleByRetdec(state.shortName)
+  }
   // we can do some local parsing while we wait for disassembly to finish
   // find strings (any contiguous sequence of more than 4 ascii characters)
   const strings = []
@@ -54,10 +56,10 @@ export async function loadOdbFile ({ commit, state }) {
   odbFile.strings = strings
 
   const { data, transfer } = await disassemblyTask
+  const cCode = await disassemblyTaskRetdec
   bus.$emit(NOTIFY, {
     text: 'Parsing disassembling...'
   })
-
   // parse branches
   // deepdi returns { <dec_address: String>: [ if_taken, next_instr ] }[]
   // frontend needs { srcAddr, targetAddr }[]
@@ -80,6 +82,7 @@ export async function loadOdbFile ({ commit, state }) {
   }
 
   commit(types.LOAD_ODBFILE, {
+    cCode,
     odbFile,
     allDus,
     vmaToLda

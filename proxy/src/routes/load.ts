@@ -45,6 +45,7 @@ export default async function load(req: Request, res: Response) {
                 },
                 base_address: 0, // set by either readelf_complete or readpe_complete
             },
+            isexe:false,
             endians: [], // arm: ['LE', 'BE'], x86: ['x86', 'x64']
             displayUnits: {
                 size: 0 // set in /disassemble/
@@ -66,7 +67,7 @@ export default async function load(req: Request, res: Response) {
         };
         info.binary.desc = await file(project.file_path);
         // info.binary.desc = ['PE32+ executable (GUI) x86-64', 'for MS Windows'];
-
+        
         const tasks = [];
         if (project.raw) {
             info.binary.text = Array.from([...binary_bytes]).map(x => x.toString(16).padStart(2, '0')).join(' ');
@@ -108,7 +109,9 @@ export default async function load(req: Request, res: Response) {
                 flags: [get_section_flag('A') as SectionFlag]
             });
         }
-
+        if(project.isexe){
+            info.isexe = true;
+        }
         await Promise.all(tasks);
 
         // add sections to symbols if there's nothing at that address
@@ -276,7 +279,7 @@ interface Info {
     project_name: string;
     binary: BinaryInfo;
     live_mode: boolean; // whether or not we are analyzing raw bytes
-
+    isexe:boolean;
     functions: BinaryFunction[];
     labels: unknown[]; // parsed client side
     sections: BinarySection[];

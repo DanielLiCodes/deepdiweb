@@ -10,34 +10,7 @@ import { exec,execSync, spawn, execFileSync, spawnSync } from 'child_process';
 const cs = require('@alexaltea/capstone-js/dist/capstone.min.js');
 
 export default async function disassemble(req: Request, res: Response) {
-    try {
-        // var cmd = await spawn('python3', ['src/routes/retdec/bin/retdec-decompiler.py', 'src/examples/JRuler.exe']);
-        // var cmd = await exec('python3 src/routes/retdec/bin/retdec-decompiler.py src/examples/JRuler.exe')
 
-        //  cmd.stdout.on('data', (data:any) => {
-        //     console.log(`stdout: ${data}`);
-        //   });
-        //   cmd.stderr.on('data', (data:any) => {
-        //     console.error(`this.mpvProcess stderr: ${data}`);
-        //   });
-        //   cmd.on('close', (code:any) => {
-        //     console.log(`child process close all stdio with code ${code}`);
-        //   });
-        //   cmd.on('disconnect', () => {
-        //     console.log(`disconnected`);
-        //   });
-        //   cmd.on('exit', () => {
-        //     process.disconnect();
-        // });
-
-        // cmd.on('error', (err) => {
-        //     console.log(`child process error with code ${err}`);
-        // });
-    }
-    catch(error) {
-        console.log("errrr")
-        console.log(error);
-    }
    
 
     const short_name = req.params.short_name as string;
@@ -127,7 +100,7 @@ export default async function disassemble(req: Request, res: Response) {
     }
 }
 export async function disassemble_retdec(req:Request, res:Response){
-    const short_name = req.body.params.short_name.short_name as string;
+    const short_name = req.body.params.short_name as string;
     if (!short_name) {
         res.status(400).send('Short name not provided');
         return;
@@ -147,7 +120,9 @@ export async function disassemble_retdec(req:Request, res:Response){
         res.status(200).send(raw);
     }
     catch (ex) {
+
         console.log('disasem retdec error route')
+        res.status(400).send(`${short_name} not found`);
     }
 }
 

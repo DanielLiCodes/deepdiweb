@@ -1,17 +1,14 @@
 <template>
     <div>
-    <input type="file" @change="previewFiles">
-    <button v-on:click="disassembleRetdec(shortname)">Disassemble!</button>
     <code-highlight class = "code_holder" id = "code_holder" language="cpp">
-        {{dataToDisplay}}
+        {{cCode==undefined ? dataToDisplay:cCode}}
     </code-highlight>
     </div>
 </template>
 <script> 
 import CodeHighlight from "vue-code-highlight/src/CodeHighlight.vue";
 import "vue-code-highlight/themes/duotone-sea.css";
-import { uploadFile, disassembleByRetdec } from '../../api/oda'
-
+import { mapState } from 'vuex'
 export default {
   data: function(){
     return {dataToDisplay:"C Code from retdec here!\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", shortname:""}
@@ -20,20 +17,10 @@ export default {
   components:{
       CodeHighlight
   },
+  computed:mapState(['cCode']),
+  mounted: {
+  },
   methods: {
-   previewFiles(event) {
-    uploadFile({filedata:event.target.files[0], projectName:event.target.files[0].name}).then((result)=>{
-        this.shortname = result;
-        return result
-    });
-   },
-   disassembleRetdec (short) {
-    var x = disassembleByRetdec(short);
-    x.then((result)=>{
-        this.dataToDisplay = result;
-        return result
-    });
-   },
   }, 
 //   props:{
       

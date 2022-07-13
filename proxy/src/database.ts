@@ -27,8 +27,8 @@ export function delete_project(key: string): boolean {
 interface ProjectInfo {
     project_name: string;
     file_path: string; // the full path to the saved location
-
     raw: boolean; // whether or not we have raw bytes vs an actual file
+    isexe?: boolean; //temp addition
     // only set if raw is true
     arch?: string;
     mode?: string;

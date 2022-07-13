@@ -22,12 +22,13 @@ export default async function upload(req: Request, res: Response) {
         add_project(short_name, {
             project_name: file.name || project_name || short_name,
             file_path,
-
+            isexe: (file.mimetype== 'application/x-msdownload'),
             raw: arch !== 'detect',
             arch,
             mode
         });
         res.status(200).json({ short_name });
+        console.log(`uploaded ${short_name}`)
 
         // remove any files past our upload limit
         await clear_cache_if_over();
