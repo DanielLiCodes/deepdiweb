@@ -28,7 +28,7 @@ export default async function upload(req: Request, res: Response) {
             mode
         });
         res.status(200).json({ short_name });
-        console.log(`uploaded ${short_name}`)
+        console.log(`uploaded ${short_name} as ${file.mimetype}`)
 
         // remove any files past our upload limit
         await clear_cache_if_over();
