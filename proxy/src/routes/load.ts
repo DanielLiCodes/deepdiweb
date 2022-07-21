@@ -83,16 +83,16 @@ export default async function load(req: Request, res: Response) {
 
         if (info.binary.desc.some(x => x.indexOf('ELF') !== -1)) {
             // sections, base_address
-            tasks.push(readelf(project.file_path).then(({ sections, base_address }) => {
-                info.sections = sections;
-                info.binary.base_address = base_address;
-            }));
+            // tasks.push(readelf(project.file_path).then(({ sections, base_address }) => {
+            //     info.sections = sections;
+            //     info.binary.base_address = base_address;
+            // }));
 
-            // symbols, functions
-            tasks.push(nm(project.file_path).then(({ symbols, functions }) => {
-                info.symbols = symbols;
-                info.functions = functions;
-            }));
+            // // symbols, functions
+            // tasks.push(nm(project.file_path).then(({ symbols, functions }) => {
+            //     info.symbols = symbols;
+            //     info.functions = functions;
+            // }));
         } else if (info.binary.desc.some(x => x.indexOf('PE32') !== -1)) {
             // tasks.push(objdump(project.file_path).then(({ sections, base_address }) => {
             //     info.sections = sections;
@@ -109,24 +109,26 @@ export default async function load(req: Request, res: Response) {
                 flags: [get_section_flag('A') as SectionFlag]
             });
         }
+        console.log("MADE IT AHHHHHH")
+        console.log(project.isexe)
         if(project.isexe){
             info.isexe = true;
         }
-        await Promise.all(tasks);
+        // await Promise.all(tasks);
 
         // add sections to symbols if there's nothing at that address
-        for (const { name, vma, flags } of info.sections) {
-            if (!flags.some(flag => flag.abbrev === 'ALLOC'))
-                continue;
+        // for (const { name, vma, flags } of info.sections) {
+        //     if (!flags.some(flag => flag.abbrev === 'ALLOC'))
+        //         continue;
 
-            if (!info.symbols.some(symbol => symbol.vma === vma)) {
-                info.symbols.push({
-                    name,
-                    vma,
-                    type: 'r'
-                });
-            }
-        }
+        //     if (!info.symbols.some(symbol => symbol.vma === vma)) {
+        //         info.symbols.push({
+        //             name,
+        //             vma,
+        //             type: 'r'
+        //         });
+        //     }
+        // }
 
         res.status(200).json(
             info

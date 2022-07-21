@@ -143,7 +143,6 @@ export default {
         this.topLda = event.lda
         return
       }
-
       this.topLda = await api.vmaToLda(event.address)
     })
   },

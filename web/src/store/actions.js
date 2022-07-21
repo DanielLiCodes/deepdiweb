@@ -25,19 +25,19 @@ export async function loadOdbFile ({ commit, state }) {
     text: 'Disassembling...'
   })
   let disassemblyTask
+  let disassemblyTaskRetdec
   if (odbFile.live_mode) {
     disassemblyTask = api.disassembleBytes({
       bytes: odbFile.binary.text,
       arch: odbFile.binary.options.architecture,
       mode: odbFile.binary.options.endian
     })
+  } else if (odbFile.isexe) {
+    disassemblyTaskRetdec = api.disassembleByRetdec(state.shortName)
   } else {
     disassemblyTask = api.disassemble(state.shortName)
   }
-  let disassemblyTaskRetdec
-  if (odbFile.isexe) {
-    disassemblyTaskRetdec = api.disassembleByRetdec(state.shortName)
-  }
+
   // we can do some local parsing while we wait for disassembly to finish
   // find strings (any contiguous sequence of more than 4 ascii characters)
   const strings = []
@@ -54,9 +54,22 @@ export async function loadOdbFile ({ commit, state }) {
   }
   if (currString.string.length > 4) { strings.push(currString) }
   odbFile.strings = strings
+  let data, transfer
+  let cCode
+  let binary
+  if (odbFile.isexe) {
+    const resp = await disassemblyTaskRetdec
+    cCode = resp.cCode
+    binary = resp.binary
+    data = binary.data
+    transfer = binary.transfer
+    console.log(cCode)
+  } else {
+    const resp = await disassemblyTask
+    data = resp.data
+    transfer = resp.transfer
+  }
 
-  const { data, transfer } = await disassemblyTask
-  const cCode = await disassemblyTaskRetdec
   bus.$emit(NOTIFY, {
     text: 'Parsing disassembling...'
   })

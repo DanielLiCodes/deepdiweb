@@ -22,7 +22,7 @@ export default async function upload(req: Request, res: Response) {
         add_project(short_name, {
             project_name: file.name || project_name || short_name,
             file_path,
-            isexe: (file.mimetype== 'application/x-msdownload'),
+            isexe: arch == 'detect',
             raw: arch !== 'detect',
             arch,
             mode
