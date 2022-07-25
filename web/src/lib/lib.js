@@ -26,6 +26,7 @@ export function buildDUs (state, odbFile, { data, branches }) {
       ? offset - baseAddress // pe offset is from the vma of the first section
       : offset // elf offset is directly from start of file
 
+    const funcs = state.funcs
     // push all instructions returned by deepdi
     const du = {
       sectionName: '', // find sections later after the instructions are sorted
@@ -43,7 +44,8 @@ export function buildDUs (state, odbFile, { data, branches }) {
       crossRef: [], // list of dus that reference this du
       // isFunction: false, // unused
       // labelName: '', // unused
-      isCode: true
+      isCode: instruction.text.indexOf('#') === -1,
+      function: funcs[vma]
     }
 
     dusByAddress.set(vma, du)
@@ -107,7 +109,9 @@ export function buildDUs (state, odbFile, { data, branches }) {
 
   return dus
 }
+export function buildFunctions (state, odbFile, functions, data) {
 
+}
 function parseInstruction (odbFile, { vma, size, text }) {
   const parts = text.split(' ')
   const opcode = parts.splice(0, 1)[0]
@@ -141,24 +145,24 @@ function parseInstruction (odbFile, { vma, size, text }) {
       instruction.transferAddress = address
     }
 
-    if (CALL_INSTRS.has(op)) {
-      // create a new function if it's not a function already
-      if (!odbFile.functions.some(func => func.vma === address)) {
-        const name = `func_0x${address.toString(16)}`
-        odbFile.functions.push({
-          retval: 'unknown',
-          args: 'unknown',
-          vma: address,
-          name
-        })
+    // if (CALL_INSTRS.has(op)) {
+    //   // create a new function if it's not a function already
+    //   if (!odbFile.functions.some(func => func.vma === address)) {
+    //     const name = `func_0x${address.toString(16)}`
+    //     odbFile.functions.push({
+    //       retval: 'unknown',
+    //       args: 'unknown',
+    //       vma: address,
+    //       name
+    //     })
 
-        odbFile.symbols.push({
-          name,
-          vma: address,
-          type: 't'
-        })
-      }
-    }
+    //     odbFile.symbols.push({
+    //       name,
+    //       vma: address,
+    //       type: 't'
+    //     })
+    //   }
+    // }
   }
 
   /*

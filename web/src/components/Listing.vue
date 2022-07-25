@@ -20,10 +20,55 @@
       style="background-color:#bbb; position: absolute; left: 0; right: 0px; top: 0; bottom: 0; overflow: hidden"
     >
       <div style="position:absolute; top:0px; left:0px; width: 125px; bottom: 0px; z-index:10;">
-        <BranchLines :rendered-dus="renderedDus" />
+        <BranchLines :rendered-dus="listOfDus" />
       </div>
-
       <div
+        v-for="key in Object.keys(renderedDus)"
+        :key ="{}"
+      >
+        <div
+          style="height:15px;"
+          class="display-line"
+          v-for="(du, index) in renderedDus[key]"
+          :key ="{'vma': du.vma, 'repr': du.instStr}"
+          :class="{ 'active-listing-line': du.index === selectedLine }"
+          @click="setSelectedLine(du.index, $event)"
+          @contextmenu.prevent="showContextMenu(du.index, $event)"
+        >
+          <div class="cell-branch" />
+          <div class="listing-contents">
+            <table>
+              <tr v-if="!du.dummy">
+                <td>{{ du.sectionName }} </td>
+                <td>:{{ du.vma | hex }}</td>
+                <td
+                  style="padding-left:8px;"
+                  class="rawBytes"
+                >
+                  <div style="width:120px; overflow:hidden">
+                    {{ du.rawBytes }}
+                  </div>
+                </td>
+                <td>
+                  <div
+                    class="insn"
+                    v-html="du.instStr"
+                  />
+                </td>
+                <td>
+                  <div
+                    v-if="du.comment"
+                    class="comment"
+                  >
+                    ; {{ du.comment }}
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- <div
         v-for="(du, index) in renderedDus"
         :key="{'vma': du.vma, 'repr': du.instStr}"
         style="height:15px;"
@@ -62,9 +107,8 @@
               </td>
             </tr>
           </table>
-          <!-- : {{ du.vma | hex}} {{ du.rawBytes }} {{ du.comment }} <span v-html="du.instStr"></span> -->
         </div>
-      </div>
+      </div>-->
     </div>
 
     <div class="disassembly-scroll">
@@ -84,6 +128,15 @@
         <h6 class="dropdown-header">
           ODA Commands 0x{{ highlightedAddress | hex }} isCode: {{ highlightedDu.isCode }}
         </h6>
+        <button
+          class="dropdown-item listing-context-menu-item"
+          @click="convertToC(highlightedAddress)"
+        >
+          Convert to C
+          <div class="context-menu-key-shortcut">
+            u
+          </div>
+        </button>
         <button
           class="dropdown-item listing-context-menu-item"
           @click="makeComment()"
@@ -157,13 +210,15 @@ import { Scroller } from '../lib/scroller'
 import { vmaToLda } from '../api/oda'
 import ContextMenu from './ContextMenu'
 import BranchLines from './BranchLines'
+import DecompilerVue from './Decompiler.vue'
+import { disassembleByRetdecFunction } from '../store/actions'
 
 const MAX_CROSSREFS = 20
 
 const Keypress = require('keypress.js/keypress-2.1.4.min')
 
 let scroller = null
-
+let val
 function intToHex (value) {
   const stringValue = value.toString(16)
   const s = '000000000' + stringValue
@@ -200,7 +255,32 @@ export default {
       }
 
       const duss = this.$store.getters.dusByRange(this.topInstLogicalDuNum, this.numLinesShown)
-      const listOfRenderedDus = duss.map((du) => this.renderDu(du))
+      // list of functions
+      // list of dus in those functions
+      // make new render du that divides dus by function
+      // highlight all in a div on onClick
+      // right click pulls up c code Decompiler
+      // redirects into c code
+      const dic = { nofunc: [] }
+      let index = 0
+      const listOfRenderedDus = duss.map((du) => {
+        const rendered = this.renderDu(du)
+        rendered.forEach((ele) => {
+          ele.index = index
+          index += 1
+          if (ele.func === undefined) {
+            dic.nofunc.push(ele)
+            return
+          }
+          if (dic[ele.func] === undefined) {
+            dic[ele.func] = [ele]
+          } else {
+            (dic[ele.func]).push(ele)
+          }
+        })
+        return rendered
+      })
+      console.log(dic)
 
       // const a = performance.now()
       // const listOfRenderedDus = this.$store.getters.renderDusInRange(this.topInstLogicalDuNum, this.numLinesShown, this.renderDu)
@@ -227,14 +307,37 @@ export default {
       if (top.length > 1) {
         listOfRenderedDus[0] = top.slice(top.length * this.vma)
       }
+      return dic
+      // return _.flatten(listOfRenderedDus)
+    },
+    listOfDus () {
+      if (this.numLinesShown === 0) {
+        return []
+      }
 
+      const duss = this.$store.getters.dusByRange(this.topInstLogicalDuNum, this.numLinesShown)
+      // list of functions
+      // list of dus in those functions
+      // make new render du that divides dus by function
+      // highlight all in a div on onClick
+      // right click pulls up c code Decompiler
+      // redirects into c code
+      const listOfRenderedDus = duss.map((du) => {
+        const rendered = this.renderDu(du)
+        return rendered
+      })
+      const top = listOfRenderedDus[0]
+      scroller.setTopInstructionLength(top.length)
+      if (top.length > 1) {
+        listOfRenderedDus[0] = top.slice(top.length * this.vma)
+      }
       return _.flatten(listOfRenderedDus)
     },
     highlightedDu () {
-      if (!this.renderedDus[this.selectedLine]) {
+      if (!this.listOfDus[this.selectedLine]) {
         return {}
       }
-      return this.renderedDus[this.selectedLine]
+      return this.listOfDus[this.selectedLine]
     },
     highlightedAddress () {
       if (this.highlightedDu) {
@@ -369,6 +472,18 @@ export default {
     }, 5))
   },
   methods: {
+    convertToC (hex) {
+      if (!this.listOfDus[this.selectedLine]) {
+        return {}
+      } else {
+        const func = this.$store.state.funcs[hex]
+        console.log(func)
+        this.$store.dispatch('disassembleByRetdecFunction', {
+          func: func
+        })
+      }
+      return this.listOfDus[this.selectedLine]
+    },
     showContextMenu (index, event) {
       this.setSelectedLine(index, event)
       this.$refs.menu.open(event)
@@ -421,19 +536,25 @@ export default {
 
       const comment = this.$store.getters.commentsByAddress[du.vma]
       const func = this.$store.getters.functionsByAddress[du.vma]
-
+      const stateFuncs = this.$store.state.funcs[du.vma]
+      let funcName
+      if (stateFuncs !== undefined) {
+        funcName = stateFuncs.vma
+      }
       const k = []
 
-      if (func) {
+      if (func !== undefined) {
         k.push({
           sectionName: du.sectionName,
           isCode: du.isCode,
-          vma: du.vma
+          vma: du.vma,
+          func: funcName
         }, {
           sectionName: du.sectionName,
           isCode: du.isCode,
           vma: du.vma,
-          instStr: '; ==================================== F U N C T I O N ===================================='
+          instStr: '; ===========' + func.name + '===========',
+          func: funcName
         })
 
         // Currently xrefs are dup'ed over vma?
@@ -443,23 +564,27 @@ export default {
             sectionName: du.sectionName,
             isCode: du.isCode,
             vma: du.vma,
-            instStr: `; CODE XREF: <span data-addr="${uniqCrossRef[i].vma}" class='xref-location'>0x${intToHex(uniqCrossRef[i].vma)}</span>`
+            instStr: `; CODE XREF: <span data-addr="${uniqCrossRef[i].vma}" class='xref-location'>0x${intToHex(uniqCrossRef[i].vma)}</span>`,
+            func: funcName
           })
         }
         k.push({
           sectionName: du.sectionName,
           isCode: du.isCode,
-          vma: du.vma
+          vma: du.vma,
+          func: funcName
         }, {
           sectionName: du.sectionName,
           isCode: du.isCode,
           vma: du.vma,
           rawBytes: '',
-          instStr: `<span class="function-return">${func.retval}</span> <span class="function-name">${func.name}</span> (${func.args})`
+          instStr: `<span class="function-return">${func.retval}</span> <span class="function-name">${func.name}</span> (${func.args})`,
+          func: funcName
         }, {
           sectionName: du.sectionName,
           isCode: du.isCode,
-          vma: du.vma
+          vma: du.vma,
+          func: funcName
         })
       }
 
@@ -467,19 +592,22 @@ export default {
         k.push({
           sectionName: du.sectionName,
           isCode: du.isCode,
-          vma: du.vma
+          vma: du.vma,
+          func: funcName
         }, {
           sectionName: du.sectionName,
           isCode: du.isCode,
           vma: du.vma,
-          instStr: `<div style="margin-left: -40px;">loc_${intToHex(du.vma)}:</div>`
+          instStr: `<div style="margin-left: -40px;">loc_${intToHex(du.vma)}:</div>`,
+          func: funcName
         }, {
           sectionName: du.sectionName,
           isCode: du.isCode,
           vma: du.vma,
           rawBytes: du.rawBytes,
           comment: _.get(comment, 'comment'),
-          instStr: du.instStr
+          instStr: du.instStr,
+          func: funcName
         })
       } else if (du.targetRef) {
         const targetFunction = this.$store.getters.functionsByAddress[du.targetRef.vma]
@@ -494,7 +622,8 @@ export default {
           vma: du.vma,
           rawBytes: du.rawBytes,
           comment: _.get(comment, 'comment'),
-          instStr: `${du.instStr} <span data-addr="${du.targetRef.vma}" class="xref-location">${targetName}</span>`
+          instStr: `${du.instStr} <span data-addr="${du.targetRef.vma}" class="xref-location">${targetName}</span>`,
+          func: funcName
         })
       } else {
         k.push({
@@ -503,10 +632,10 @@ export default {
           vma: du.vma,
           rawBytes: du.rawBytes,
           comment: _.get(comment, 'comment'),
-          instStr: du.instStr
+          instStr: du.instStr,
+          func: funcName
         })
       }
-
       return k
     }
   }

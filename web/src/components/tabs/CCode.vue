@@ -1,7 +1,7 @@
 <template>
     <div>
     <code-highlight class = "code_holder" id = "code_holder" language="cpp">
-        {{cCode==undefined ? dataToDisplay:cCode}}
+        {{cCode==undefined || cCode == '' ? dataToDisplay:cCode}}
     </code-highlight>
     </div>
 </template>

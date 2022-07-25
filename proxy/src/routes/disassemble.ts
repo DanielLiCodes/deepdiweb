@@ -112,15 +112,49 @@ export async function disassemble_retdec(req:Request, res:Response){
         return;
     }
     try {
-        spawnSync('python3', ['src/routes/retdec/bin/retdec-decompiler.py', project.file_path]);
-        const rawCCode = await fs.readFile(`${project.file_path}.c`, "utf8");
+        spawnSync('python3', ['src/routes/retdec/bin/retdec-decompiler.py', project.file_path, '--stop-after', 'bin2llvmir']);
+        // const rawCCode = await fs.readFile(`${project.file_path}.c`, "utf8");
         const parsedBinary = await parseBinary(`${project.file_path}.dsm`);
-        const raw = {'cCode':rawCCode, 'binary':parsedBinary};
+        const raw = {'binary':parsedBinary};
         res.status(200).send(raw);
     }
     catch (ex) {
 
         console.log('disasem retdec error route')
+        res.status(400).send(`${short_name} not found`);
+    }
+}
+
+export async function disassemble_retdec_func(req:Request, res:Response){
+    const short_name = req.body.params.short_name as string;
+    if (!short_name) {
+        res.status(400).send('Short name not provided');
+        return;
+    }
+    const project = get_project(short_name);
+    if (!project) {
+        console.log(short_name);
+        console.log(project);
+        res.status(400).send(`${short_name} not found`);
+        return;
+    }
+    try {
+        const func_data =  req.body.params.function_data
+        console.log("HERE")
+        if(func_data.func === undefined){
+            
+            res.status(200).send(undefined);
+        } else{
+            spawnSync('python3', ['src/routes/retdec/bin/retdec-decompiler.py', project.file_path, '--select-functions', func_data.func.name]);
+            const rawCCode = await fs.readFile(`${project.file_path}.c`, "utf8");
+            console.log(rawCCode)
+            res.status(200).send(rawCCode);
+        }
+
+    }
+    catch (ex) {
+
+        console.log('disasem retdec func error route')
         res.status(400).send(`${short_name} not found`);
     }
 }
@@ -204,14 +238,27 @@ async function parseBinary(file_path:string){
     const func_list:string_keyed_dict = {};
     let curr_add = 0;
     let starting_add;
+    let curr_func_add;
     for await (const line of rl) {
         if(line.split('\t').length<2 && line.substring(0, 10) !== '; function'){
+            if(line.indexOf('|')!== -1){
+                
+                const temp = line.split(':')[1]
+                const temp2 = temp.split('|')[0]
+                const byte_list = (temp2.split(' ')).filter((item:string)=>{return item !== ''})
+                data_list.push([curr_add, byte_list.length, '#'+temp.split('|')[1]])
+                func_list[curr_func_add].cmd_vmas.push(curr_add)
+                curr_add += byte_list.length
+                continue
+            }
             continue
-        } else if(line.indexOf(';; Data Segment') !== -1) {
-            break
+        }
+        if(line.indexOf(';; Dat')!==-1) {
+            break;
         }
         
-        if(line[0] != ';' && line.length>2){   //skip comment lines
+        
+        if(line[0] != ';' && line.length>2 && line.indexOf('|')==-1){   //skip comment lines
             const temp = line.split(':')
             const vma = temp[0]
             const rem = temp[1];
@@ -225,13 +272,15 @@ async function parseBinary(file_path:string){
             
             const byte_list = (bytes.split(' ')).filter((item:string)=>{return item !== ''})
             data_list.push([curr_add, byte_list.length, string_code])
-            
+            func_list[curr_func_add].cmd_vmas.push(curr_add)
             if(string_code[0] == 'j'){
                 const cmd_list = string_code.split(' ')
                 if(cmd_list[1].slice(0,2) == '0x'){
                     transfer_list[curr_add.toString(10)] = [Number(cmd_list[1])-Number(starting_add), curr_add + byte_list.length]
+                    
                 }
             }
+            
             curr_add += byte_list.length;
             
         }else if(line.substring(0, 10) == '; function'){
@@ -240,7 +289,8 @@ async function parseBinary(file_path:string){
             const funcName = line.split('function: ')[1].split(' at ')[0];
             const funcStart = line.split('at ')[1].split(' -- ')[0];
             const funcEnd = line.split(' -- ')[1];
-            func_list[funcName] = [funcStart, funcEnd]
+            func_list[funcStart] = {'name':funcName, 'vma':isNaN(funcStart-starting_add) ? 0:funcStart-starting_add, 'vma_start':funcStart, 'vma_end': funcEnd, 'cmd_vmas': []}
+            curr_func_add = funcStart;
             // add to dict with funcName as key, and funcStart and funcEnd as values in an array
         }
     }

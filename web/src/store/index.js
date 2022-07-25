@@ -53,10 +53,11 @@ export default new Vuex.Store({
 
     //
     vmaToLda: {},
-    cCode: 'POGGYWOGGY'
+    cCode: '',
+    funcs: {}
   },
   mutations: {
-    [types.LOAD_ODBFILE] (state, { cCode, odbFile, allDus, vmaToLda }) {
+    [types.LOAD_ODBFILE] (state, { odbFile, allDus, vmaToLda, func }) {
       state.displayUnits.splice(0)
       for (const k in state.displayUnitChunks) {
         delete state.displayUnitChunks[k]
@@ -100,7 +101,7 @@ export default new Vuex.Store({
       // _.each(startingDisplayUnits, (du, i) => {
       //   Vue.set(state.displayUnits, i, du)
       // })
-      state.cCode = cCode
+      state.funcs = func
     },
 
     [types.SET_SHORTNAME] (state, { shortName }) {

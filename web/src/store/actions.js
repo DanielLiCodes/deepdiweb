@@ -2,7 +2,7 @@ import * as api from '../api/oda'
 
 // import {Realtime} from '../realtime'
 import * as types from './mutation-types'
-
+// import _ from 'lodash'
 import { bus, NOTIFY } from '../bus'
 import { buildDUs, buildParcels } from '../lib/lib'
 
@@ -55,15 +55,22 @@ export async function loadOdbFile ({ commit, state }) {
   if (currString.string.length > 4) { strings.push(currString) }
   odbFile.strings = strings
   let data, transfer
-  let cCode
+  // let cCode
   let binary
+  let functions
+  const func = {}
   if (odbFile.isexe) {
     const resp = await disassemblyTaskRetdec
-    cCode = resp.cCode
+    // cCode = resp.cCode
     binary = resp.binary
     data = binary.data
     transfer = binary.transfer
-    console.log(cCode)
+    functions = binary.functions
+    for (const [key, value] of Object.entries(functions)) {
+      value.cmd_vmas.forEach((val) => {
+        func[val] = functions[key]
+      })
+    }
   } else {
     const resp = await disassemblyTask
     data = resp.data
@@ -84,7 +91,7 @@ export async function loadOdbFile ({ commit, state }) {
     })
   }
   odbFile.branches = branches
-
+  odbFile.functions = functions
   // parse dus
   const allDus = buildDUs(state, odbFile, { data, branches })
 
@@ -95,10 +102,10 @@ export async function loadOdbFile ({ commit, state }) {
   }
 
   commit(types.LOAD_ODBFILE, {
-    cCode,
     odbFile,
     allDus,
-    vmaToLda
+    vmaToLda,
+    func
   })
 
   commit(types.SET_PARCELS, {
@@ -114,6 +121,13 @@ export async function loadOdbFile ({ commit, state }) {
   // }
 
   // realtime = new Realtime('http://localhost:8080')
+}
+
+export async function disassembleByRetdecFunction ({ commit, state }, func) {
+  const cCode = await api.disassembleByRetdecFuncRanges(state.shortName, func)
+  if (cCode !== '') {
+    state.cCode = cCode
+  }
 }
 
 export function loadDu ({ commit, state }, { addr, units }) {

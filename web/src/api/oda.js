@@ -45,6 +45,20 @@ export async function disassembleByRetdec (shortName) {
     error({ e, message: 'disasem by retdec' })
   }
 }
+
+export async function disassembleByRetdecFuncRanges (shortName, func) {
+  try {
+    const response = await odaAxios.post('/odaweb/api/disassembleretdecranges', {
+      params: {
+        function_data: func,
+        short_name: shortName
+      }
+    })
+    return response.data
+  } catch (e) {
+    error({ e, message: 'disasem by retdec func ranges' })
+  }
+}
 // export async function loadDisplayUnits (addr, units) {
 //   console.log('loading display units', addr, units)
 //   try {
