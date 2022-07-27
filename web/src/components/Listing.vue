@@ -473,11 +473,11 @@ export default {
   },
   methods: {
     convertToC (hex) {
+      console.log('converting')
       if (!this.listOfDus[this.selectedLine]) {
         return {}
       } else {
         const func = this.$store.state.funcs[hex]
-        console.log(func)
         this.$store.dispatch('disassembleByRetdecFunction', {
           func: func
         })
@@ -536,6 +536,7 @@ export default {
 
       const comment = this.$store.getters.commentsByAddress[du.vma]
       const func = this.$store.getters.functionsByAddress[du.vma]
+      console.log(du.vma)
       const stateFuncs = this.$store.state.funcs[du.vma]
       let funcName
       if (stateFuncs !== undefined) {

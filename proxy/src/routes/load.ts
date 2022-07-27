@@ -109,8 +109,6 @@ export default async function load(req: Request, res: Response) {
                 flags: [get_section_flag('A') as SectionFlag]
             });
         }
-        console.log("MADE IT AHHHHHH")
-        console.log(project.isexe)
         if(project.isexe){
             info.isexe = true;
         }

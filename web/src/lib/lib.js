@@ -6,13 +6,15 @@ export function buildDUs (state, odbFile, { data, branches }) {
   // const a = odbFile.functions
 
   const baseAddress = odbFile.binary.base_address
+  console.log(baseAddress)
 
   const instrAddrs = new Set()
   const functionCalls = [] // [ srcDu, functionAddress ][]
 
-  const vmaOffsetToAdd = odbFile.binary.desc.some(x => x.toLowerCase().indexOf('pe32') !== -1)
-    ? 0
-    : baseAddress
+  // const vmaOffsetToAdd = odbFile.binary.desc.some(x => x.toLowerCase().indexOf('pe32') !== -1)
+  //   ? 0
+  //   : baseAddress
+  const vmaOffsetToAdd = Number(baseAddress)
 
   const dus = []
   for (const [offset, size, text] of data) {

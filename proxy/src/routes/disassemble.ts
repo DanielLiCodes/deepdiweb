@@ -115,7 +115,7 @@ export async function disassemble_retdec(req:Request, res:Response){
         spawnSync('python3', ['src/routes/retdec/bin/retdec-decompiler.py', project.file_path, '--stop-after', 'bin2llvmir']);
         // const rawCCode = await fs.readFile(`${project.file_path}.c`, "utf8");
         const parsedBinary = await parseBinary(`${project.file_path}.dsm`);
-        const raw = {'binary':parsedBinary};
+        const raw = {'binary':parsedBinary.bytes, 'base_add': parsedBinary.base_add};
         res.status(200).send(raw);
     }
     catch (ex) {
@@ -247,7 +247,7 @@ async function parseBinary(file_path:string){
                 const temp2 = temp.split('|')[0]
                 const byte_list = (temp2.split(' ')).filter((item:string)=>{return item !== ''})
                 data_list.push([curr_add, byte_list.length, '#'+temp.split('|')[1]])
-                func_list[curr_func_add].cmd_vmas.push(curr_add)
+                func_list[curr_func_add].cmd_vmas.push(curr_add+Number(starting_add))
                 curr_add += byte_list.length
                 continue
             }
@@ -272,11 +272,11 @@ async function parseBinary(file_path:string){
             
             const byte_list = (bytes.split(' ')).filter((item:string)=>{return item !== ''})
             data_list.push([curr_add, byte_list.length, string_code])
-            func_list[curr_func_add].cmd_vmas.push(curr_add)
+            func_list[curr_func_add].cmd_vmas.push(curr_add+Number(starting_add))
             if(string_code[0] == 'j'){
                 const cmd_list = string_code.split(' ')
                 if(cmd_list[1].slice(0,2) == '0x'){
-                    transfer_list[curr_add.toString(10)] = [Number(cmd_list[1])-Number(starting_add), curr_add + byte_list.length]
+                    transfer_list[curr_add.toString(10)] = [Number(cmd_list[1]) - Number(starting_add), curr_add + byte_list.length]
                     
                 }
             }
@@ -289,14 +289,15 @@ async function parseBinary(file_path:string){
             const funcName = line.split('function: ')[1].split(' at ')[0];
             const funcStart = line.split('at ')[1].split(' -- ')[0];
             const funcEnd = line.split(' -- ')[1];
-            func_list[funcStart] = {'name':funcName, 'vma':isNaN(funcStart-starting_add) ? 0:funcStart-starting_add, 'vma_start':funcStart, 'vma_end': funcEnd, 'cmd_vmas': []}
+            func_list[funcStart] = {'name':funcName, 'vma':Number(funcStart), 'vma_start':funcStart, 'vma_end': funcEnd, 'cmd_vmas': []}
             curr_func_add = funcStart;
             // add to dict with funcName as key, and funcStart and funcEnd as values in an array
         }
     }
     fileStream.close()
     //parse the data from bytes into a better form
+    console.log(transfer_list)
     const result = {'data':data_list, 'transfer':transfer_list, 'functions':func_list}
-    return result;
+    return {'bytes': result, 'base_add':starting_add};
 
 }

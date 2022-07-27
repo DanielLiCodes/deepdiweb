@@ -66,6 +66,7 @@ export async function loadOdbFile ({ commit, state }) {
     data = binary.data
     transfer = binary.transfer
     functions = binary.functions
+    odbFile.binary.base_address = Number(resp.base_add)
     for (const [key, value] of Object.entries(functions)) {
       value.cmd_vmas.forEach((val) => {
         func[val] = functions[key]
@@ -86,10 +87,13 @@ export async function loadOdbFile ({ commit, state }) {
   const branches = []
   for (const [address, branchTargets] of Object.entries(transfer)) {
     branches.push({
-      srcAddr: Number.parseInt(address) + odbFile.binary.base_address,
+      srcAddr: Number(address) + odbFile.binary.base_address,
       targetAddr: branchTargets[0] + odbFile.binary.base_address
     })
+    console.log(address)
+    console.log(branchTargets)
   }
+  console.log(branches)
   odbFile.branches = branches
   odbFile.functions = functions
   // parse dus
@@ -127,6 +131,9 @@ export async function disassembleByRetdecFunction ({ commit, state }, func) {
   const cCode = await api.disassembleByRetdecFuncRanges(state.shortName, func)
   if (cCode !== '') {
     state.cCode = cCode
+    bus.$emit(NOTIFY, {
+      text: 'Finished C Disassembly!'
+    })
   }
 }
 

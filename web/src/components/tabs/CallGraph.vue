@@ -46,6 +46,7 @@ export default {
     },
     createGraph() {
         let a = this.$store.state.displayUnits;
+        console.log(a)
         // get all lines of assembly
         //dictionary with key of memory address in int, and assembly code as value
         let dictData = {};
