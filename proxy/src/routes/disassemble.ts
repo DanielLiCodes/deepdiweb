@@ -147,10 +147,6 @@ export async function disassemble_retdec_func(req:Request, res:Response){
         } else{
             spawnSync('python3', ['src/routes/retdec/bin/retdec-decompiler.py', project.file_path, '--select-functions', func_data.func.name]);
             const rawCCode = await fs.readFile(`${project.file_path}.c`, "utf8");
-<<<<<<< HEAD
-=======
-            // console.log(rawCCode)
->>>>>>> f2d8989224a9f9b47ab1609285554478bf732e1c
             res.status(200).send(rawCCode);
         }
 
