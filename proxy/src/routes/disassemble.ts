@@ -106,8 +106,8 @@ export async function disassemble_retdec(req:Request, res:Response){
     }
     const project = get_project(short_name);
     if (!project) {
-        console.log(short_name);
-        console.log(project);
+        // console.log(short_name);
+        // console.log(project);
         res.status(400).send(`${short_name} not found`);
         return;
     }
@@ -133,8 +133,8 @@ export async function disassemble_retdec_func(req:Request, res:Response){
     }
     const project = get_project(short_name);
     if (!project) {
-        console.log(short_name);
-        console.log(project);
+        // console.log(short_name);
+        // console.log(project);
         res.status(400).send(`${short_name} not found`);
         return;
     }
@@ -147,7 +147,7 @@ export async function disassemble_retdec_func(req:Request, res:Response){
         } else{
             spawnSync('python3', ['src/routes/retdec/bin/retdec-decompiler.py', project.file_path, '--select-functions', func_data.func.name]);
             const rawCCode = await fs.readFile(`${project.file_path}.c`, "utf8");
-            console.log(rawCCode)
+            // console.log(rawCCode)
             res.status(200).send(rawCCode);
         }
 
@@ -296,7 +296,7 @@ async function parseBinary(file_path:string){
     }
     fileStream.close()
     //parse the data from bytes into a better form
-    console.log(transfer_list)
+    // console.log(transfer_list)
     const result = {'data':data_list, 'transfer':transfer_list, 'functions':func_list}
     return {'bytes': result, 'base_add':starting_add};
 

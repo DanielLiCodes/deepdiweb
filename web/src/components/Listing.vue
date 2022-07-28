@@ -280,7 +280,7 @@ export default {
         })
         return rendered
       })
-      console.log(dic)
+      // console.log(dic)
 
       // const a = performance.now()
       // const listOfRenderedDus = this.$store.getters.renderDusInRange(this.topInstLogicalDuNum, this.numLinesShown, this.renderDu)
@@ -365,7 +365,7 @@ export default {
     const self = this
 
     bus.$on(NAVIGATE_TO_ADDRESS, async function (event) {
-      console.log('NAVIGATE_TO_ADDRESS', event.address.toString(16), event.lda)
+      // console.log('NAVIGATE_TO_ADDRESS', event.address.toString(16), event.lda)
       let lda = event.lda
       if (lda === undefined) {
         lda = await vmaToLda(event.address)
@@ -536,7 +536,7 @@ export default {
 
       const comment = this.$store.getters.commentsByAddress[du.vma]
       const func = this.$store.getters.functionsByAddress[du.vma]
-      console.log(du.vma)
+      // console.log(du.vma)
       const stateFuncs = this.$store.state.funcs[du.vma]
       let funcName
       if (stateFuncs !== undefined) {

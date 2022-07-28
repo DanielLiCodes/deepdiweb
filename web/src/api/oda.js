@@ -34,7 +34,7 @@ export async function loadOdbFile () {
 }
 export async function disassembleByRetdec (shortName) {
   try {
-    console.log(shortName)
+    // console.log(shortName)
     const response = await odaAxios.post('/odaweb/api/disassembleretdec', {
       params: {
         short_name: shortName

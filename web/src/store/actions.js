@@ -90,8 +90,8 @@ export async function loadOdbFile ({ commit, state }) {
       srcAddr: Number(address) + odbFile.binary.base_address,
       targetAddr: branchTargets[0] + odbFile.binary.base_address
     })
-    console.log(address)
-    console.log(branchTargets)
+    // console.log(address)
+    // console.log(branchTargets)
   }
   console.log(branches)
   odbFile.branches = branches
@@ -125,6 +125,7 @@ export async function loadOdbFile ({ commit, state }) {
   // }
 
   // realtime = new Realtime('http://localhost:8080')
+  bus.$emit('doneLoading', 'done loading file')
 }
 
 export async function disassembleByRetdecFunction ({ commit, state }, func) {
