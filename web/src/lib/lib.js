@@ -15,7 +15,7 @@ export function buildDUs (state, odbFile, { data, branches }) {
   //   ? 0
   //   : baseAddress
   const vmaOffsetToAdd = Number(baseAddress)
-
+  console.log(state.binaryBytes)
   const dus = []
   for (const [offset, size, text] of data) {
     // deepdi returns addresses as an offset
@@ -23,8 +23,7 @@ export function buildDUs (state, odbFile, { data, branches }) {
     const vma = offset + vmaOffsetToAdd
 
     const instruction = parseInstruction(odbFile, { vma, size, text })
-
-    const physOffsetStart = baseAddress
+    const physOffsetStart = offset
 
     const funcs = state.funcs
     // push all instructions returned by deepdi
