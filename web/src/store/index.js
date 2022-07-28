@@ -57,7 +57,7 @@ export default new Vuex.Store({
     funcs: {}
   },
   mutations: {
-    [types.LOAD_ODBFILE] (state, { odbFile, allDus, vmaToLda, func }) {
+    [types.LOAD_ODBFILE] (state, { odbFile, allDus, vmaToLda, func, functions }) {
       state.displayUnits.splice(0)
       for (const k in state.displayUnitChunks) {
         delete state.displayUnitChunks[k]
@@ -102,6 +102,7 @@ export default new Vuex.Store({
       //   Vue.set(state.displayUnits, i, du)
       // })
       state.funcs = func
+      state.function_list = functions
     },
 
     [types.SET_SHORTNAME] (state, { shortName }) {

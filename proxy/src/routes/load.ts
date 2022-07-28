@@ -82,13 +82,13 @@ export default async function load(req: Request, res: Response) {
         }
 
         if (info.binary.desc.some(x => x.indexOf('ELF') !== -1)) {
-            // sections, base_address
+            // // sections, base_address
             // tasks.push(readelf(project.file_path).then(({ sections, base_address }) => {
             //     info.sections = sections;
             //     info.binary.base_address = base_address;
             // }));
 
-            // // symbols, functions
+            // symbols, functions
             // tasks.push(nm(project.file_path).then(({ symbols, functions }) => {
             //     info.symbols = symbols;
             //     info.functions = functions;
@@ -102,12 +102,12 @@ export default async function load(req: Request, res: Response) {
             // raw data
 
             // sections
-            info.sections.push({
-                name: 'data',
-                vma: 0,
-                size: binary_bytes.length,
-                flags: [get_section_flag('A') as SectionFlag]
-            });
+            // info.sections.push({
+            //     name: 'data',
+            //     vma: 0,
+            //     size: binary_bytes.length,
+            //     flags: [get_section_flag('A') as SectionFlag]
+            // });
         }
         if(project.isexe){
             info.isexe = true;

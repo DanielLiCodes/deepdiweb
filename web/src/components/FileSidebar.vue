@@ -28,6 +28,14 @@
             <i class="fa fa-search" />
           </a>
         </li>
+        <li>
+          <a
+            :class="{ 'active-link': selectedPanel == 'funcs' }"
+            @click="setSelectedPanel('funcs')"
+          >
+            <i class="fa fa-search" />
+          </a>
+        </li>
 
         <!-- <li>
           <a
@@ -59,6 +67,9 @@
       <div v-if="selectedPanel == 'findBytes'">
         <FindBytes />
       </div>
+      <div v-if="selectedPanel == 'funcs'">
+        <Functions />
+      </div>
       <!-- <div v-if="selectedPanel == 'structures'">
         <Structures />
       </div> -->
@@ -70,17 +81,18 @@
 </template>
 
 <script>
-import { bus, CLOSE_SIDEBAR, SHOW_FINDBYTES_PANEL, SHOW_STRINGS_PANEL, SHOW_SYMBOLS_PANEL } from '../bus'
+import { bus, CLOSE_SIDEBAR, SHOW_FINDBYTES_PANEL, SHOW_STRINGS_PANEL, SHOW_SYMBOLS_PANEL, SHOW_FUNCTIONS_PANEL } from '../bus'
 import Symbols from './panels/Symbols'
 import Strings from './panels/Strings'
 import FindBytes from './panels/FindBytes'
+import Functions from './panels/Functions'
 // import Structures from './panels/Structures'
 // import Operations from './panels/Operations'
 
 export default {
   name: 'FileSidebar',
   components: {
-    Symbols, Strings, FindBytes //, Structures, Operations
+    Symbols, Strings, FindBytes, Functions //, Structures, Operations
   },
   data () {
     return {
@@ -96,6 +108,9 @@ export default {
     })
     bus.$on(SHOW_SYMBOLS_PANEL, () => {
       this.selectedPanel = 'symbols'
+    })
+    bus.$on(SHOW_FUNCTIONS_PANEL, () => {
+      this.selectedPanel = 'funcs'
     })
 
     // icons

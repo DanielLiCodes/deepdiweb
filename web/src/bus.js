@@ -20,6 +20,7 @@ export const SHOW_GOTOADDRESS_MODAL = 'show.gotoaddress.modal'
 export const SHOW_FINDBYTES_PANEL = 'show.findbytes.panel'
 export const SHOW_SYMBOLS_PANEL = 'show.symbols.panel'
 export const SHOW_STRINGS_PANEL = 'show.strings.panel'
+export const SHOW_FUNCTIONS_PANEL = 'show.functions.panel'
 export const OPEN_LISTING_TAB = 'open.listing.tab'
 
 export const MODAL_HIDDEN = 'modal.hidden'

@@ -90,10 +90,7 @@ export async function loadOdbFile ({ commit, state }) {
       srcAddr: Number(address) + odbFile.binary.base_address,
       targetAddr: branchTargets[0] + odbFile.binary.base_address
     })
-    // console.log(address)
-    // console.log(branchTargets)
   }
-  console.log(branches)
   odbFile.branches = branches
   odbFile.functions = functions
   // parse dus
@@ -109,7 +106,8 @@ export async function loadOdbFile ({ commit, state }) {
     odbFile,
     allDus,
     vmaToLda,
-    func
+    func,
+    functions
   })
 
   commit(types.SET_PARCELS, {
