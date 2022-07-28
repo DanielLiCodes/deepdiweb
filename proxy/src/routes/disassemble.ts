@@ -147,7 +147,6 @@ export async function disassemble_retdec_func(req:Request, res:Response){
         } else{
             spawnSync('python3', ['src/routes/retdec/bin/retdec-decompiler.py', project.file_path, '--select-functions', func_data.func.name]);
             const rawCCode = await fs.readFile(`${project.file_path}.c`, "utf8");
-            console.log(rawCCode)
             res.status(200).send(rawCCode);
         }
 
@@ -276,7 +275,7 @@ async function parseBinary(file_path:string){
             if(string_code[0] == 'j'){
                 const cmd_list = string_code.split(' ')
                 if(cmd_list[1].slice(0,2) == '0x'){
-                    transfer_list[curr_add.toString(10)] = [Number(cmd_list[1]) - Number(starting_add), curr_add + byte_list.length]
+                    transfer_list[(curr_add).toString(10)] = [Number(cmd_list[1]) - Number(starting_add), curr_add + byte_list.length]
                     
                 }
             }
@@ -296,7 +295,6 @@ async function parseBinary(file_path:string){
     }
     fileStream.close()
     //parse the data from bytes into a better form
-    console.log(transfer_list)
     const result = {'data':data_list, 'transfer':transfer_list, 'functions':func_list}
     return {'bytes': result, 'base_add':starting_add};
 

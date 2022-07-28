@@ -24,9 +24,7 @@ export function buildDUs (state, odbFile, { data, branches }) {
 
     const instruction = parseInstruction(odbFile, { vma, size, text })
 
-    const physOffsetStart = odbFile.binary.desc.some(x => x.toLowerCase().indexOf('pe32') !== -1)
-      ? offset - baseAddress // pe offset is from the vma of the first section
-      : offset // elf offset is directly from start of file
+    const physOffsetStart = baseAddress
 
     const funcs = state.funcs
     // push all instructions returned by deepdi
@@ -233,7 +231,9 @@ export function buildParcels (dus, vmaToLda, transferTargets) {
   let currSection
   let currAddr
   let currCode
-
+  console.log(dus)
+  console.log(vmaToLda)
+  console.log(transferTargets)
   for (const du of dus) {
     const { sectionName, vma, rawBytes, isCode, opcode } = du
     // console.log(`${sectionName} ? ${currSection} | ${currAddr} ? ${vma} | ${currCode} ? ${isCode}`)
@@ -278,6 +278,7 @@ export function buildParcels (dus, vmaToLda, transferTargets) {
 
   if (currParcel) { parcels.push(currParcel) }
   window.parcels = parcels
+  console.log(parcels)
   return parcels
 }
 
@@ -312,6 +313,7 @@ export function buildGraph (store, vma) {
 
   const processedParcels = new Set()
   const parcelsToProcess = [startingParcel]
+  console.log(parcelsToProcess)
   while (parcelsToProcess.length > 0) {
     const currParcel = parcelsToProcess.pop()
     // console.log('currParcel', currParcel)
@@ -337,7 +339,6 @@ export function buildGraph (store, vma) {
 
     processedParcels.add(currParcel.vma_start)
   }
-
   return graph
 }
 

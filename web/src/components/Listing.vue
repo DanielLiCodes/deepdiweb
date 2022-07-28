@@ -280,7 +280,6 @@ export default {
         })
         return rendered
       })
-      console.log(dic)
 
       // const a = performance.now()
       // const listOfRenderedDus = this.$store.getters.renderDusInRange(this.topInstLogicalDuNum, this.numLinesShown, this.renderDu)
@@ -382,7 +381,7 @@ export default {
 
       self.topInstLogicalDuNum = lda
 
-      scroller.setTop(self.topInstLogicalDuNum)
+      scroller.setTop(self.topInstLogicalDuNum + 0.5)
 
       self.selectedLine = 0
     })
@@ -536,7 +535,6 @@ export default {
 
       const comment = this.$store.getters.commentsByAddress[du.vma]
       const func = this.$store.getters.functionsByAddress[du.vma]
-      console.log(du.vma)
       const stateFuncs = this.$store.state.funcs[du.vma]
       let funcName
       if (stateFuncs !== undefined) {
