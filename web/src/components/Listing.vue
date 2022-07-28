@@ -364,7 +364,7 @@ export default {
     const self = this
 
     bus.$on(NAVIGATE_TO_ADDRESS, async function (event) {
-      console.log('NAVIGATE_TO_ADDRESS', event.address.toString(16), event.lda)
+      // console.log('NAVIGATE_TO_ADDRESS', event.address.toString(16), event.lda)
       let lda = event.lda
       if (lda === undefined) {
         lda = await vmaToLda(event.address)

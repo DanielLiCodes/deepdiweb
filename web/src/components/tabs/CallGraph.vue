@@ -182,6 +182,8 @@ export default {
             .attr("overflow-x", "hidden");
         const g1 = svg.append("g");
         //console.log(svg)
+        console.log("rect width" + width)
+        console.log("status-bar height" + botBox.top + "rect base" + rect.bottom)
         svg.call(d3.zoom()
             .extent([[0, 0], [width, height]]) 
             .scaleExtent([0.2, 8])  //scale limits

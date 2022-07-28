@@ -123,6 +123,7 @@ export async function loadOdbFile ({ commit, state }) {
   // }
 
   // realtime = new Realtime('http://localhost:8080')
+  bus.$emit('doneLoading', 'done loading file')
 }
 
 export async function disassembleByRetdecFunction ({ commit, state }, func) {
