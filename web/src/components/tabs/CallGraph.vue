@@ -4,6 +4,7 @@
 
 </template>
 <script>
+import { bus, NAVIGATE_TO_ADDRESS } from '../../bus'
 import dagreD3 from "dagre-d3"
 import * as d3 from "d3"
 import $ from 'jquery' 
@@ -23,6 +24,9 @@ export default {
         console.log("IN")
   },
   methods: {
+    onClick(){
+        console.log("IN")
+    },
     redrawGraph(){
         const zz = d3
             .select('svg');
@@ -163,6 +167,12 @@ export default {
             g.setNode(
                 sortedBoundaries[i], {label: nodeText}
             )
+            // ).on('click', function(d){
+            //     //emit current functions address thru bus
+            //     bus.$emit(NAVIGATE_TO_ADDRESS, { address: d.vma })
+            //     console.log(d.vma)
+            //     console.log(d.addr)
+            // })
         }
 
         console.log("READY TO RENDER")
@@ -190,6 +200,16 @@ export default {
             .on("zoom", function () {
                 g1.attr("transform", d3.zoomTransform(this))
             }))
+        // svg.call(function (symbol) {
+        //     bus.$emit(NAVIGATE_TO_ADDRESS, { address: symbol.addr })
+        // }.on("click", function (d) {
+        //     // bus.$emit(NAVIGATE_TO_ADDRESS, { address: d.vma })
+        //     console.log('clicked')
+        // }))
+        // const nodes = d3
+        //     .select("#nodes");
+        // console.log(nodes)
+
 
 
         // function zoomed({transform}) {
@@ -197,6 +217,23 @@ export default {
         // }
         var render = new dagreD3.render();
         render(g1, g);
+        var svgg = d3.select("svg");
+        svgg.selectAll("g.node").on("click", function(id) { 
+            var _node = g.node(id); 
+            console.log("Clicked " + id,_node); 
+            //use bus to emit a message with node info so that dissasembly tab can be switched to at the right location
+            // console.log(_node)\
+            bus.$emit(NAVIGATE_TO_ADDRESS, { address: _node.label.split("\n")[0] })
+
+            bus.$emit("nodeClicked", { address: _node.label.split("\n")[0] })
+            });
+
+        // function onClick(symbol) {
+        //     // bus.$emit(NAVIGATE_TO_ADDRESS, { address: symbol.addr })
+        //     console.log("CLICKED")
+        // }
+        // svg.call(function(){}.on("click", function(){console.log("???")}))
+        // svg.on('click', function(d){console.log('clicked')})
 
         // this.graph.push(svg);
         // this.graph.push(g1);

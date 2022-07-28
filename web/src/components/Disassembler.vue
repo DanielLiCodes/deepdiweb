@@ -142,7 +142,7 @@ import * as types from '@/store/mutation-types.js'
 
 import { mapState } from 'vuex'
 import { copyOdaMaster, canEdit } from '../api/oda'
-import { OPEN_LISTING_TAB, NOTIFY, bus } from '../bus'
+import { OPEN_LISTING_TAB, NOTIFY, NAVIGATE_TO_ADDRESS, bus } from '../bus'
 
 
 export default {
@@ -195,7 +195,7 @@ export default {
     // fetch the data when the view is created and the data is
     // already being observed
     this.fetchData()
-
+    bus.$on(NAVIGATE_TO_ADDRESS, ()=>{this.tabIndex=0;})
     bus.$on(OPEN_LISTING_TAB, () => { this.tabIndex = 0 })
     bus.$on('doneLoading', () => {this.visitedTabs = []; this.tabIndex = 0; console.log("reset visited")})
   },
