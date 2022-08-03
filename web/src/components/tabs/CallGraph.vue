@@ -98,10 +98,11 @@ export default {
             let id = dictKeysArray[index]; //current lineID
             //find the function boundary in boundaries dict
             let loopToo = funcBoundaries[id] ? funcBoundaries[id] : funcBoundaries[0]; 
-            let nodeText = id+"\n" //text to add to current Node
+            let nodeText = "0x"+id.toString(16)+"\n" //text to add to current Node
             g.setNode(
                 id, {label: nodeText} //update current node with id
             );
+            // console.log(id + "   " + nodeText)
             let idNext = dictKeysArray[index]; //var to use to loop thru ids, without mutating id
             while(dictData[idNext] && idNext < loopToo){ //while there are still nodes to check, keep looping
                 if(dictData[idNext].includes("call") && dictData[idNext].slice(5,7) == "0x"){ //check if there is a call
@@ -130,7 +131,7 @@ export default {
 
         //loop through all functions, and generate nodes for them
         for(let i = 0; i < sortedBoundaries.length; i++){
-            let nodeText = sortedBoundaries[i] + '\n'; //add node text
+            let nodeText = "0x" + sortedBoundaries[i].toString(16) + '\n'; //add node text
             //start index
             let startIndex = dictKeysArray.findIndex(element => element == sortedBoundaries[i]);
             //where function ends
