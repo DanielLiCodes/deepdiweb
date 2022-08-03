@@ -212,11 +212,8 @@ import ContextMenu from './ContextMenu'
 import BranchLines from './BranchLines'
 import DecompilerVue from './Decompiler.vue'
 import { disassembleByRetdecFunction } from '../store/actions'
-
 const MAX_CROSSREFS = 20
-
 const Keypress = require('keypress.js/keypress-2.1.4.min')
-
 let scroller = null
 let val
 function intToHex (value) {
@@ -224,7 +221,6 @@ function intToHex (value) {
   const s = '000000000' + stringValue
   return s.substr(s.length - 8)
 }
-
 export default {
   name: 'ListingView',
   components: {
@@ -236,15 +232,11 @@ export default {
       locationStack: [],
       loading: false,
       height: 100,
-
       topInstLogicalDuNum: 0,
       numDus: 0,
-
       numLinesShown: 0,
       addressAtTop: null,
-
       selectedLine: 0,
-
       isLoadingDus: false
     }
   },
@@ -253,7 +245,6 @@ export default {
       if (this.numLinesShown === 0) {
         return []
       }
-
       const duss = this.$store.getters.dusByRange(this.topInstLogicalDuNum, this.numLinesShown)
       // list of functions
       // list of dus in those functions
@@ -280,11 +271,9 @@ export default {
         })
         return rendered
       })
-
       // const a = performance.now()
       // const listOfRenderedDus = this.$store.getters.renderDusInRange(this.topInstLogicalDuNum, this.numLinesShown, this.renderDu)
       // console.log(`2: ${performance.now() - a}`)
-
       // Hack to avoid dealing with live mode (avoid reloading when DUs is less then some max
       // if (this.$store.state.displayUnitsLength > 500) {
       //   for (let i = 0; i < listOfRenderedDus.length; i++) {
@@ -300,7 +289,6 @@ export default {
       //     }
       //   }
       // }
-
       const top = listOfRenderedDus[0]
       scroller.setTopInstructionLength(top.length)
       if (top.length > 1) {
@@ -313,7 +301,6 @@ export default {
       if (this.numLinesShown === 0) {
         return []
       }
-
       const duss = this.$store.getters.dusByRange(this.topInstLogicalDuNum, this.numLinesShown)
       // list of functions
       // list of dus in those functions
@@ -342,7 +329,6 @@ export default {
       if (this.highlightedDu) {
         return this.highlightedDu.vma
       }
-
       return null
     }
   },
@@ -362,14 +348,12 @@ export default {
   },
   created: async function () {
     const self = this
-
     bus.$on(NAVIGATE_TO_ADDRESS, async function (event) {
       // console.log('NAVIGATE_TO_ADDRESS', event.address.toString(16), event.lda)
       let lda = event.lda
       if (lda === undefined) {
         lda = await vmaToLda(event.address)
       }
-
       if (lda === undefined) {
         // address outside of our range (i.e., an externally linked symbol)
         bus.$emit(NOTIFY, {
@@ -378,25 +362,19 @@ export default {
         })
         return
       }
-
       self.topInstLogicalDuNum = lda
-
       scroller.setTop(self.topInstLogicalDuNum + 0.5)
-
       self.selectedLine = 0
     })
-
     bus.$on(MODAL_HIDDEN, function () {
       self.$el.focus()
     })
   },
   mounted: function (elem) {
     window.addEventListener('resize', _.debounce(this.handleResize, 250))
-
     const self = this
     const listener = new Keypress.Listener(this.$el)
     const lines = this.$store.state.displayUnitsLength
-
     listener.simple_combo('down', function () {
       if (self.topInstLogicalDuNum + 1 < lines) {
         if (self.selectedLine + 8 > self.numLinesShown) {
@@ -406,39 +384,30 @@ export default {
         }
       }
     })
-
     // listener.simple_combo('c', () => {
     //   self.dataToCode()
     // })
-
     // listener.simple_combo('d', () => {
     //   self.codeToData()
     // })
-
     // listener.simple_combo(';', () => {
     //   self.makeComment()
     // })
-
     // listener.simple_combo('g', () => {
     //   self.gotoAddress()
     // })
-
     // listener.simple_combo('t', () => {
     //   self.editFunction()
     // })
-
     // listener.simple_combo('a', () => {
     //   self.createString()
     // })
-
     // listener.simple_combo('u', () => {
     //   self.undefineData()
     // })
-
     // listener.simple_combo('v', () => {
     //   self.makeDefinedData()
     // })
-
     listener.simple_combo('up', function () {
       if (self.selectedLine < 6 && self.topInstLogicalDuNum > 0) {
         self.topInstLogicalDuNum -= 1
@@ -446,24 +415,20 @@ export default {
         self.selectedLine -= 1
       }
     })
-
     listener.simple_combo('esc', function () {
       if (self.locationStack.length > 0) {
         const location = self.locationStack.pop()
         bus.$emit(NAVIGATE_TO_ADDRESS, { address: location })
       }
     })
-
     const viewportLineHeight = 15
     const scrollLineHeight = viewportLineHeight * 1.0
     this.height = lines * viewportLineHeight
     scroller = new Scroller(viewportLineHeight)
     window.scroller = scroller
-
     this.numLinesShown = scroller.numLinesShown()
     bus.$on(EVENT_SCROLLED, _.debounce((data) => {
       const fractionalScrollInLines = Math.floor(data.scrollTop / scrollLineHeight)
-
       if (fractionalScrollInLines < lines) {
         self.topInstLogicalDuNum = Math.floor(fractionalScrollInLines)
         self.vma = fractionalScrollInLines % 1
@@ -532,7 +497,6 @@ export default {
       if (du.dummy) {
         return [{ dummy: true }]
       }
-
       const comment = this.$store.getters.commentsByAddress[du.vma]
       const func = this.$store.getters.functionsByAddress[du.vma]
       const stateFuncs = this.$store.state.funcs[du.vma]
@@ -541,7 +505,6 @@ export default {
         funcName = stateFuncs.vma
       }
       const k = []
-
       if (func !== undefined) {
         k.push({
           sectionName: du.sectionName,
@@ -555,7 +518,6 @@ export default {
           instStr: '; ===========' + func.name + '===========',
           func: funcName
         })
-
         // Currently xrefs are dup'ed over vma?
         const uniqCrossRef = _.uniqBy(du.crossRef, 'vma')
         for (let i = 0; (i < uniqCrossRef.length) && (i < MAX_CROSSREFS); i++) {
@@ -586,7 +548,6 @@ export default {
           func: funcName
         })
       }
-
       if (du.isBranch) {
         k.push({
           sectionName: du.sectionName,
@@ -614,7 +575,6 @@ export default {
         if (targetFunction) {
           targetName = targetFunction.name
         }
-
         k.push({
           sectionName: du.sectionName,
           isCode: du.isCode,
@@ -651,18 +611,15 @@ export default {
     width: 14px;
     overflow: scroll;
   }
-
   .listing {
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
     font-size: 14px;
     background-color: white;
   }
-
   .display-line {
     background-color: white;
     line-height: 15px;
   }
-
   .cell-branch {
     color: #093C83;
     background-color: #f3f3f3;
@@ -672,7 +629,6 @@ export default {
     left: 0px;
     position: absolute;
   }
-
   .section {
     position: absolute;
     left: 125px;
@@ -681,40 +637,33 @@ export default {
     white-space: nowrap;
     overflow: hidden;
   }
-
   .vma {
     position: absolute;
     left: 265px;
     width: 100px;
   }
-
   .rawBytes {
     color: gray;
     overflow: hidden;
   }
-
   .instStr {
     position: absolute;
     left: 500px;
     width: 2000px;
     color: gray;
   }
-
   .listing-contents {
     position: absolute;
     width:1800px;
     left: 125px;
   }
-
 </style>
 
 <style>
-
   .listing-context-menu-item {
     margin-right: 20px;
     position: relative;
   }
-
   .context-menu-key-shortcut {
     position: absolute;
     right: 10px;
@@ -727,28 +676,22 @@ export default {
     border: 1px solid #aaa;
     border-radius: 3px;
   }
-
   .instruction {
     color: #093C83;
   }
-
   .comment {
     color: #009933;
     white-space: nowrap;
   }
-
   .function-return {
     font-style: italic;
   }
-
   .function-name {
     font-weight: bold;
   }
-
   .insn {
     color: #093c83;
   }
-
   .xref-location {
     /* http://stackoverflow.com/questions/20376008/how-to-underline-text-and-change-mouse-cursor-to-pointer-in-ace-editor */
     /* border-bottom: 1px solid black; */
@@ -757,20 +700,16 @@ export default {
     cursor: pointer !important;
     pointer-events: auto;
   }
-
   .xref-location:hover {
     /* http://stackoverflow.com/questions/20376008/how-to-underline-text-and-change-mouse-cursor-to-pointer-in-ace-editor */
     /* border-bottom: 1px solid black; */
     color: #005580;
     text-decoration: underline;
   }
-
   .active-listing-line {
     background-color: #FFB !important;
   }
-
   .active-listing-line div {
     background-color: #FFB !important;
   }
-
 </style>

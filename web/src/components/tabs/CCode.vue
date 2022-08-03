@@ -1,14 +1,17 @@
+
 <template>
     <div>
-    <code-highlight class = "code_holder" id = "code_holder" language="cpp">
-        {{cCode==undefined || cCode == '' ? dataToDisplay:cCode}}
-    </code-highlight>
+        <code-highlight language="c">
+            {{cCode==undefined || cCode == '' ? dataToDisplay:cCode}}
+        </code-highlight>
     </div>
 </template>
 <script> 
 import CodeHighlight from "vue-code-highlight/src/CodeHighlight.vue";
 import "vue-code-highlight/themes/duotone-sea.css";
 import { mapState } from 'vuex'
+// import Prism from 'prismjs'
+import 'prismjs/components/prism-c'
 export default {
   data: function(){
     return {dataToDisplay:"C Code from retdec here!\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", shortname:""}
