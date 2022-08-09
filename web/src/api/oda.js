@@ -17,7 +17,19 @@ function error (e) {
   bus.$emit(API_ERROR, e)
   throw e
 }
-
+export async function loadOdbFiletoDatabase (odbfile, shortName) {
+  try {
+    const response = await odaAxios.post('/odaweb/api/createdocument', {
+      params: {
+        odbfile: odbfile,
+        short_name: shortName
+      }
+    })
+    return response.data
+  } catch (e) {
+    error({ e, message: `loading odb file ${store.state.shortName} to database` })
+  }
+}
 export async function loadOdbFile () {
   try {
     const response = await odaAxios.get('/odaweb/api/load', {

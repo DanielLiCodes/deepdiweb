@@ -6,7 +6,6 @@ export function buildDUs (state, odbFile, { data, branches }) {
   // const a = odbFile.functions
 
   const baseAddress = odbFile.binary.base_address
-  console.log(baseAddress)
 
   const instrAddrs = new Set()
   const functionCalls = [] // [ srcDu, functionAddress ][]
@@ -15,7 +14,6 @@ export function buildDUs (state, odbFile, { data, branches }) {
   //   ? 0
   //   : baseAddress
   const vmaOffsetToAdd = Number(baseAddress)
-  console.log(state.binaryBytes)
   const dus = []
   for (const [offset, size, text] of data) {
     // deepdi returns addresses as an offset
@@ -230,9 +228,6 @@ export function buildParcels (dus, vmaToLda, transferTargets) {
   let currSection
   let currAddr
   let currCode
-  console.log(dus)
-  console.log(vmaToLda)
-  console.log(transferTargets)
   for (const du of dus) {
     const { sectionName, vma, rawBytes, isCode, opcode } = du
     // console.log(`${sectionName} ? ${currSection} | ${currAddr} ? ${vma} | ${currCode} ? ${isCode}`)

@@ -8,6 +8,7 @@ import path from 'path';
 import upload from './routes/upload';
 import { EXAMPLES, EXAMPLE_NAMES } from './examples/examples';
 import disassemble, { disassemble_bytes, disassemble_retdec, disassemble_retdec_func } from './routes/disassemble';
+import { createDocument } from './database';
 var timeout = require('connect-timeout')
 
 const router = Router();
@@ -57,4 +58,5 @@ router.post('/api/upload', upload);
 router.get('/api/load', load);
 router.post('/api/disassemble_bytes', disassemble_bytes);
 router.post('/api/:short_name/disassemble', disassemble);
+router.post('/api/createdocument', createDocument);
 export default router;

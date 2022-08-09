@@ -68,8 +68,7 @@ export default {
   created () {
     bus.$on(SHOW_FUNCTION_MODAL, (event) => {
       this.address = event.addr
-      const f = this.$store.getters.functionsByAddress[this.address]
-      console.log('EditFunction', f)
+      const f = this.$store.getters.addressToFunction[this.address]
       if (f) {
         this.functionName = f.name
         this.functionArgs = f.args

@@ -50,15 +50,14 @@ export default async function disassemble(req: Request, res: Response) {
     
             const result:Data = {}; //object of both data(array of instructions) and dictionary of jumps
             const data:any[] = [];
-            const transfer:{[key: string]: any[]} = {};
+            const transfer: any[] = []
     
             instructions.forEach(function (element:any) {
                 //push instruction
                 data.push([parseInt(element.address), element.size, element.mnemonic + ' ' + element.op_str])
                 if(element.mnemonic[0] == 'j'){
                     //if it is a jump
-                    const key =  element.address.toString(10);
-                    transfer[key] = [parseInt(element.op_str,16), element.address+element.size]
+                    transfer.push({start:element.address.toString(10), destination: parseInt(element.op_str,16), return: element.address+element.size})
                 }
             });
             result['data'] = data;
@@ -140,7 +139,6 @@ export async function disassemble_retdec_func(req:Request, res:Response){
     }
     try {
         const func_data =  req.body.params.function_data
-        console.log("HERE")
         if(func_data.func === undefined){
             
             res.status(200).send(undefined);
@@ -180,15 +178,14 @@ export async function disassemble_bytes(req: Request, res: Response) {
 
         const result:Data = {}; //object of both data(array of instructions) and dictionary of jumps
         const data:any[] = [];
-        const transfer:{[key: string]: any[]} = {};
+        const transfer:any[] = [];
 
         instructions.forEach(function (element:any) {
             //push instruction
             data.push([parseInt(element.address), element.size, element.mnemonic + ' ' + element.op_str])
             if(element.mnemonic[0] == 'j'){
                 //if it is a jump
-                const key =  element.address.toString(10);
-                transfer[key] = [parseInt(element.op_str,16), element.address+element.size]
+                transfer.push({start:element.address.toString(10), destination: parseInt(element.op_str,16), return: element.address+element.size})
             }
         });
         result['data'] = data;
@@ -233,7 +230,7 @@ async function parseBinary(file_path:string){
       crlfDelay: Infinity
     });
     const data_list = [];
-    const transfer_list:string_keyed_dict = {};
+    const transfer_list = [];
     const func_list:string_keyed_dict = {};
     let curr_add = 0;
     let starting_add;
@@ -275,7 +272,8 @@ async function parseBinary(file_path:string){
             if(string_code[0] == 'j'){
                 const cmd_list = string_code.split(' ')
                 if(cmd_list[1].slice(0,2) == '0x'){
-                    transfer_list[(curr_add).toString(10)] = [Number(cmd_list[1]) - Number(starting_add), curr_add + byte_list.length]
+                    transfer_list.push({start:(curr_add).toString(10), destination: Number(cmd_list[1]) - Number(starting_add), return: curr_add + byte_list.length})
+                    // transfer_list[(curr_add).toString(10)] = [Number(cmd_list[1]) - Number(starting_add), curr_add + byte_list.length]
                     
                 }
             }
@@ -295,7 +293,11 @@ async function parseBinary(file_path:string){
     }
     fileStream.close()
     //parse the data from bytes into a better form
-    const result = {'data':data_list, 'transfer':transfer_list, 'functions':func_list}
+    const func_arr = []
+    for (const [key, value] of Object.entries(func_list)) {
+        func_arr.push(value)
+      }
+    const result = {'data':data_list, 'transfer':transfer_list, 'functions':func_arr}
     return {'bytes': result, 'base_add':starting_add};
 
 }

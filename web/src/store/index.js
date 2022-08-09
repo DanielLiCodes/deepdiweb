@@ -254,10 +254,13 @@ export default new Vuex.Store({
       return state.user && !state.user.is_lazy_user
     },
     functionsByAddress: function (state) {
-      return _.keyBy(state.functions, 'vma')
+      return _.keyBy(state.funcs, 'vma')
     },
     commentsByAddress: function (state) {
       return _.keyBy(state.comments, 'vma')
+    },
+    addressToFunction: function (state) {
+      return state.funcs
     },
     selectedAddress: (state, getters) => {
       if (!state.selectedDu) {

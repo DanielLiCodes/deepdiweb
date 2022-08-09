@@ -86,7 +86,7 @@ export default {
   created () {
     const self = this
     bus.$on(SHOW_SHARING_MODAL, function () {
-      self.permissionLevel = self.$store.state.default_permission_level
+      // self.permissionLevel = self.$store.state.default_permission_level
       self.$refs.sharingModal.show()
     })
   },

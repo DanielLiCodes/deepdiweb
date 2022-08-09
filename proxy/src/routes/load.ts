@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 import { promises as fs } from 'fs';
-import { get_project } from '../database';
+import { get_project, get_database_project } from '../database';
 import { Request, Response } from 'express';
 import { read_until, spawn_and_read } from '../util';
 
@@ -11,7 +11,8 @@ export default async function load(req: Request, res: Response) {
         return;
     }
 
-    const project = get_project(short_name);
+    const project = get_project(short_name); // HERE should call to mongodb to check if exists
+
     if (!project) {
         res.status(400).send(`${short_name} does not exist (it could have expired)`);
         return;
@@ -25,116 +26,131 @@ export default async function load(req: Request, res: Response) {
         res.status(400).send(`${short_name} does not exist (it could have expired)`);
         return;
     }
-
-    try {
-        const info: Info = {
-            project_name: project.project_name,
-            binary: {
-                size: binary_bytes.length,
-                md5: createHash('md5').update(binary_bytes).digest('hex'),
-                sha1: createHash('sha1').update(binary_bytes).digest('hex'),
-                desc: [], // set by file_complete
-                name: project.project_name,
-                malware: false,
-                benign: true,
-                text: '', // if we have raw data
-                options: { // set by raw_data
-                    architecture: '',
-                    endian: '',
-                    selected_opts: []
+    const database_project = await get_database_project(short_name)
+    if (database_project !== null) {
+        try {
+            res.status(200).json(
+                database_project.odbFile_data
+            );
+        }
+        catch (e) {
+            console.error(`An error occured while trying to load a binary.\n${e}`);
+            res.status(400).send('An error occured while trying to load the binary.');
+        }
+    } else {
+    // HERE if project.disassembly_data !== undefined: res.status(200).send(project.disassembly_data)
+        try {
+            // HERE if info exists, aka is from mongo, just return, else run it
+            const info: Info = {
+                project_name: project.project_name,
+                binary: {
+                    size: binary_bytes.length,
+                    md5: createHash('md5').update(binary_bytes).digest('hex'),
+                    sha1: createHash('sha1').update(binary_bytes).digest('hex'),
+                    desc: [], // set by file_complete
+                    name: project.project_name,
+                    malware: false,
+                    benign: true,
+                    text: '', // if we have raw data
+                    options: { // set by raw_data
+                        architecture: '',
+                        endian: '',
+                        selected_opts: []
+                    },
+                    base_address: 0, // set by either readelf_complete or readpe_complete
                 },
-                base_address: 0, // set by either readelf_complete or readpe_complete
-            },
-            isexe:false,
-            endians: [], // arm: ['LE', 'BE'], x86: ['x86', 'x64']
-            displayUnits: {
-                size: 0 // set in /disassemble/
-            },
-            architectures: [
-                'armv7', 'x86'
-            ],
-            live_mode: false,
-            labels: [],
-            comments: [],
-            branches: [],
-            default_permission_level: 'read',
-            strings: [],
+                isexe:false,
+                endians: [], // arm: ['LE', 'BE'], x86: ['x86', 'x64']
+                displayUnits: {
+                    size: 0 // set in /disassemble/
+                },
+                architectures: [
+                    'armv7', 'x86'
+                ],
+                live_mode: false,
+                labels: [],
+                comments: [],
+                branches: [],
+                default_permission_level: 'read',
+                strings: [],
 
-            // set by the promises below
-            symbols: [],
-            functions: [],
-            sections: []
-        };
-        info.binary.desc = await file(project.file_path);
-        // info.binary.desc = ['PE32+ executable (GUI) x86-64', 'for MS Windows'];
-        
-        const tasks = [];
-        if (project.raw) {
-            info.binary.text = Array.from([...binary_bytes]).map(x => x.toString(16).padStart(2, '0')).join(' ');
-            info.binary.options.architecture = project.arch;
-            info.binary.options.endian = project.mode;
+                // set by the promises below
+                symbols: [],
+                functions: [],
+                sections: [],
+                disassembly_data: undefined
+            };
+            info.binary.desc = await file(project.file_path);
+            // info.binary.desc = ['PE32+ executable (GUI) x86-64', 'for MS Windows'];
+            
+            const tasks = [];
+            if (project.raw) {
+                info.binary.text = Array.from([...binary_bytes]).map(x => x.toString(16).padStart(2, '0')).join(' ');
+                info.binary.options.architecture = project.arch;
+                info.binary.options.endian = project.mode;
 
-            if (project.arch == 'ARM') {
-                info.endians.push('LE', 'BE');
-            } else if (project.arch === 'x86') {
-                info.endians.push('x86', 'x64');
+                if (project.arch == 'ARM') {
+                    info.endians.push('LE', 'BE');
+                } else if (project.arch === 'x86') {
+                    info.endians.push('x86', 'x64');
+                }
             }
+
+            if (info.binary.desc.some(x => x.indexOf('ELF') !== -1)) {
+                // // sections, base_address
+                // tasks.push(readelf(project.file_path).then(({ sections, base_address }) => {
+                //     info.sections = sections;
+                //     info.binary.base_address = base_address;
+                // }));
+
+                // symbols, functions
+                // tasks.push(nm(project.file_path).then(({ symbols, functions }) => {
+                //     info.symbols = symbols;
+                //     info.functions = functions;
+                // }));
+            } else if (info.binary.desc.some(x => x.indexOf('PE32') !== -1)) {
+                // tasks.push(objdump(project.file_path).then(({ sections, base_address }) => {
+                //     info.sections = sections;
+                //     info.binary.base_address = base_address;
+                // }));
+            } else {
+                // raw data
+
+                // sections
+                // info.sections.push({
+                //     name: 'data',
+                //     vma: 0,
+                //     size: binary_bytes.length,
+                //     flags: [get_section_flag('A') as SectionFlag]
+                // });
+            }
+            if(project.isexe){
+                info.isexe = true;
+            }
+            // await Promise.all(tasks);
+
+            // add sections to symbols if there's nothing at that address
+            // for (const { name, vma, flags } of info.sections) {
+            //     if (!flags.some(flag => flag.abbrev === 'ALLOC'))
+            //         continue;
+
+            //     if (!info.symbols.some(symbol => symbol.vma === vma)) {
+            //         info.symbols.push({
+            //             name,
+            //             vma,
+            //             type: 'r'
+            //         });
+            //     }
+            // }
+
+            res.status(200).json(
+                info
+            );
         }
-
-        if (info.binary.desc.some(x => x.indexOf('ELF') !== -1)) {
-            // // sections, base_address
-            // tasks.push(readelf(project.file_path).then(({ sections, base_address }) => {
-            //     info.sections = sections;
-            //     info.binary.base_address = base_address;
-            // }));
-
-            // symbols, functions
-            // tasks.push(nm(project.file_path).then(({ symbols, functions }) => {
-            //     info.symbols = symbols;
-            //     info.functions = functions;
-            // }));
-        } else if (info.binary.desc.some(x => x.indexOf('PE32') !== -1)) {
-            // tasks.push(objdump(project.file_path).then(({ sections, base_address }) => {
-            //     info.sections = sections;
-            //     info.binary.base_address = base_address;
-            // }));
-        } else {
-            // raw data
-
-            // sections
-            // info.sections.push({
-            //     name: 'data',
-            //     vma: 0,
-            //     size: binary_bytes.length,
-            //     flags: [get_section_flag('A') as SectionFlag]
-            // });
+        catch (ex) {
+            console.error(`An error occured while trying to load a binary.\n${ex}`);
+            res.status(400).send('An error occured while trying to load the binary.');
         }
-        if(project.isexe){
-            info.isexe = true;
-        }
-        // await Promise.all(tasks);
-
-        // add sections to symbols if there's nothing at that address
-        // for (const { name, vma, flags } of info.sections) {
-        //     if (!flags.some(flag => flag.abbrev === 'ALLOC'))
-        //         continue;
-
-        //     if (!info.symbols.some(symbol => symbol.vma === vma)) {
-        //         info.symbols.push({
-        //             name,
-        //             vma,
-        //             type: 'r'
-        //         });
-        //     }
-        // }
-
-        res.status(200).json(
-            info
-        );
-    }
-    catch (ex) {
-        console.error(`An error occured while trying to load a binary.\n${ex}`);
-        res.status(400).send('An error occured while trying to load the binary.');
     }
 }
 
@@ -296,9 +312,9 @@ interface Info {
     // TODO: user
     architectures: string[];
     endians: string[];
-
     // our implementation specific data
     // binary_bytes: number[];
+    disassembly_data: unknown;
 }
 
 interface BinaryInfo {

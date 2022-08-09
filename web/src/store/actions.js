@@ -1,41 +1,89 @@
 import * as api from '../api/oda'
 
-// import {Realtime} from '../realtime'
+import { Realtime } from '../realtime'
 import * as types from './mutation-types'
-// import _ from 'lodash'
+import _ from 'lodash'
 import { bus, NOTIFY } from '../bus'
 import { buildDUs, buildParcels } from '../lib/lib'
 
-// function sendRealtimeUpdate (msg, payload) {
-//   if (realtime) {
-//     realtime.emit(msg, payload)
-//   }
-// }
+function sendRealtimeUpdate (msg, payload) {
+  if (Realtime.realtime) {
+    Realtime.realtime.emit(msg, payload)
+  }
+}
 
-// function commitAndSendRealtimeUpdate ({ commit, state }, msg, payload) {
-//   commit(msg, payload)
-//   payload.user = _.get(state, 'user.username')
-//   payload.timestamp = new Date()
-//   sendRealtimeUpdate(msg, payload)
-// }
+function commitAndSendRealtimeUpdate ({ commit, state }, msg, payload) {
+  commit(msg, payload)
+  payload.user = _.get(state, 'user.username')
+  payload.timestamp = new Date()
+  sendRealtimeUpdate(msg, payload)
+}
 
 export async function loadOdbFile ({ commit, state }) {
   const odbFile = await api.loadOdbFile()
-  bus.$emit(NOTIFY, {
-    text: 'Disassembling...'
-  })
   let disassemblyTask
   let disassemblyTaskRetdec
-  if (odbFile.live_mode) {
-    disassemblyTask = api.disassembleBytes({
-      bytes: odbFile.binary.text,
-      arch: odbFile.binary.options.architecture,
-      mode: odbFile.binary.options.endian
-    })
-  } else if (odbFile.isexe) {
-    disassemblyTaskRetdec = api.disassembleByRetdec(state.shortName)
+  let data, transfer
+  let functions
+  let baseAdd
+  let binary
+  let functionsParsed
+  const func = {}
+  if (odbFile.disassembly_data !== undefined) {
+    const disassemblyData = odbFile.disassembly_data
+    data = disassemblyData.data
+    transfer = disassemblyData.transfer
+    functions = _.keyBy(disassemblyData.functions, 'vma_start')
+    functionsParsed = disassemblyData.functions
+    baseAdd = disassemblyData.base_add
+    state.binaryBytes = disassemblyData.binaryBytes
+    if (odbFile.isexe) {
+      // cCode = resp.cCode
+      odbFile.binary.base_address = Number(baseAdd)
+      for (const [key, value] of Object.entries(functions)) {
+        value.cmd_vmas.forEach((val) => {
+          func[val] = functions[key]
+        })
+      }
+    }
   } else {
-    disassemblyTask = api.disassemble(state.shortName)
+    bus.$emit(NOTIFY, {
+      text: 'Disassembling...'
+    })
+
+    if (odbFile.live_mode) {
+      disassemblyTask = api.disassembleBytes({
+        bytes: odbFile.binary.text,
+        arch: odbFile.binary.options.architecture,
+        mode: odbFile.binary.options.endian
+      })
+      // HERE if odb already from database, skip these and pull data after from odbFile disassemblyData
+    } else if (odbFile.isexe) {
+      disassemblyTaskRetdec = api.disassembleByRetdec(state.shortName)
+    } else {
+      disassemblyTask = api.disassemble(state.shortName)
+    }
+    // HERE also if odbFile.diassembly_data is none
+    if (odbFile.isexe) {
+      const resp = await disassemblyTaskRetdec
+      binary = resp.binary
+      data = binary.data
+      transfer = binary.transfer
+      functions = _.keyBy(binary.functions, 'vma_start')
+      functionsParsed = binary.functions
+      // cCode = resp.cCode
+      baseAdd = resp.base_add
+      odbFile.binary.base_address = Number(resp.base_add)
+      for (const [key, value] of Object.entries(functions)) {
+        value.cmd_vmas.forEach((val) => {
+          func[val] = functions[key]
+        })
+      }
+    } else {
+      const resp = await disassemblyTask
+      data = resp.data
+      transfer = resp.transfer
+    }
   }
 
   // we can do some local parsing while we wait for disassembly to finish
@@ -53,30 +101,10 @@ export async function loadOdbFile ({ commit, state }) {
     }
   }
   if (currString.string.length > 4) { strings.push(currString) }
+  strings.push(currString)
   odbFile.strings = strings
-  let data, transfer
+
   // let cCode
-  let binary
-  let functions
-  const func = {}
-  if (odbFile.isexe) {
-    const resp = await disassemblyTaskRetdec
-    // cCode = resp.cCode
-    binary = resp.binary
-    data = binary.data
-    transfer = binary.transfer
-    functions = binary.functions
-    odbFile.binary.base_address = Number(resp.base_add)
-    for (const [key, value] of Object.entries(functions)) {
-      value.cmd_vmas.forEach((val) => {
-        func[val] = functions[key]
-      })
-    }
-  } else {
-    const resp = await disassemblyTask
-    data = resp.data
-    transfer = resp.transfer
-  }
 
   bus.$emit(NOTIFY, {
     text: 'Parsing disassembling...'
@@ -84,13 +112,21 @@ export async function loadOdbFile ({ commit, state }) {
   // parse branches
   // deepdi returns { <dec_address: String>: [ if_taken, next_instr ] }[]
   // frontend needs { srcAddr, targetAddr }[]
+
   const branches = []
-  for (const [address, branchTargets] of Object.entries(transfer)) {
+  transfer.forEach((ele) => {
     branches.push({
-      srcAddr: Number(address) + odbFile.binary.base_address,
-      targetAddr: branchTargets[0] + odbFile.binary.base_address
+      srcAddr: Number(ele.start) + odbFile.binary.base_address,
+      targetAddr: ele.destination + odbFile.binary.base_address
     })
-  }
+  })
+  // console.log()
+  // for (const [address, branchTargets] of Object.entries(transfer)) {
+  //   branches.push({
+  //     srcAddr: Number(address) + odbFile.binary.base_address,
+  //     targetAddr: branchTargets[0] + odbFile.binary.base_address
+  //   })
+  // }
   odbFile.branches = branches
   odbFile.functions = functions
   // parse dus
@@ -123,6 +159,17 @@ export async function loadOdbFile ({ commit, state }) {
   // }
 
   // realtime = new Realtime('http://localhost:8080')
+  if (odbFile.disassembely_data === undefined) {
+    odbFile.disassembly_data = {
+      data: data,
+      transfer: transfer,
+      base_add: baseAdd === undefined ? 0 : baseAdd,
+      binaryBytes: Array.from(state.binaryBytes),
+      functions: functionsParsed
+    }
+    await api.loadOdbFiletoDatabase(odbFile, state.shortName)
+  }
+
   bus.$emit('doneLoading', 'done loading file')
 }
 
@@ -231,14 +278,14 @@ export async function createStructDefinedData ({ commit, state, dispatch }, { ad
 }
 
 export async function upsertFunction ({ commit, state }, { vma, name, retval, args }) {
-  // const f = _.find(state.functions, { vma: vma })
-  // if (f) {
-  //   await api.updateFunction(vma, name, retval, args)
-  // } else {
-  //   await api.createFunction(vma, name, retval, args)
-  // }
+  const f = _.find(state.functions, { vma: vma })
+  if (f) {
+    await api.updateFunction(vma, name, retval, args)
+  } else {
+    await api.createFunction(vma, name, retval, args)
+  }
 
-  // commitAndSendRealtimeUpdate({ commit, state }, types.UPDATE_FUNCTION, { vma, name, retval, args })
+  commitAndSendRealtimeUpdate({ commit, state }, types.UPDATE_FUNCTION, { vma, name, retval, args })
 }
 
 export async function addStruct ({ commit, state }, { name }) {

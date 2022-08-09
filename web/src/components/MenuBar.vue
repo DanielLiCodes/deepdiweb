@@ -26,6 +26,9 @@
           <b-dropdown-item @click="downloadDisassembly()">
             Download Disassembly  <i class="menu-icon fa fa-download" />
           </b-dropdown-item>
+          <b-dropdown-item @click="showSharing()">
+            SHARE  <i class="menu-icon fa fa-download" />
+          </b-dropdown-item>
           <!--<b-dropdown-item @click="liveMode()">Live Mode <i class="menu-icon fa fa-play-circle"></i></b-dropdown-item>-->
         </b-dropdown>
         <b-dropdown
@@ -149,6 +152,7 @@
 import { mapState } from 'vuex'
 import {
   bus,
+  SHOW_SHARING_MODAL,
   SHOW_FILE_UPLOAD_MODAL,
   SHOW_DECOMPILER_WINDOW,
   SHOW_GOTOADDRESS_MODAL,
@@ -175,6 +179,9 @@ export default {
     },
     showDecompiler () {
       bus.$emit(SHOW_DECOMPILER_WINDOW)
+    },
+    showSharing () {
+      bus.$emit(SHOW_SHARING_MODAL)
     },
     gotoAddresss () {
       bus.$emit(SHOW_GOTOADDRESS_MODAL)
