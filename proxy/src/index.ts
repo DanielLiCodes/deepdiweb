@@ -11,7 +11,12 @@ server.use((req, res, next) => {
     console.log(`[${(new Date()).toISOString()}] ${req.method} ${req.url} (${res.statusCode})`);
     next();
 });
-mongoose.connect('mongodb://localhost:27017/test');
+
+(async()=>{
+    await mongoose.connect('mongodb+srv://John:hahaha123@userdb.m4f2whj.mongodb.net/userdb?retryWrites=true&w=majority');
+})().catch(err=>console.log(err));
+
+
 server.use(express.json({limit: '5mb'}));
 server.use(fileUpload({
     safeFileNames: true,

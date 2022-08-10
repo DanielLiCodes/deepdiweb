@@ -6,6 +6,9 @@ import { abort } from 'process';
 const { Schema } = mongoose;
 export const Projects: Map<string, ProjectInfo> = new Map();
 
+
+
+
 export function add_project(key: string, info: ProjectInfo) {
     Projects.set(key, info);
 
@@ -34,7 +37,7 @@ export function update_project(key: string, data: any) {
 
 
 
-const dbProject = new Schema({
+const dbProject = new mongoose.Schema({
     odbFile_data: {
         project_name: String,
         binary: {
@@ -131,9 +134,12 @@ const odbFile = mongoose.model('odbfile', dbProject)
 export async function createDocument (req: Request, res: Response) {
     const odbfile = req.body.params.odbfile
     try {
-        await odbFile.create({odbFile_data: odbfile, short_name: req.body.params.short_name}, (err: any) => {
-            console.log("err is "+err)
-        })
+        // await odbFile.create({odbFile_data: odbfile, short_name: req.body.params.short_name}, (err: any) => {
+        //     console.log("err is "+err)
+        // })
+        // console.log(odbfile)
+        const databaseODB = new odbFile({odbFile_data: odbfile, short_name: req.body.params.short_name})
+        await databaseODB.save();
         res.send(200)
     } 
     catch (e) {
@@ -143,7 +149,9 @@ export async function createDocument (req: Request, res: Response) {
 }
 
 export async function get_database_project (short_name: string) {
+    console.log("FOUND")
     return odbFile.findOne({short_name: short_name})
+    
 
 }
 
