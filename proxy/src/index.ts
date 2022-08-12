@@ -6,6 +6,7 @@ import path from 'path';
 import router from './routes';
 import mongoose from 'mongoose';
 const server = express();
+import uri from './login'
 
 server.use((req, res, next) => {
     console.log(`[${(new Date()).toISOString()}] ${req.method} ${req.url} (${res.statusCode})`);
@@ -13,7 +14,7 @@ server.use((req, res, next) => {
 });
 
 (async()=>{
-    await mongoose.connect('mongodb+srv://John:hahaha123@userdb.m4f2whj.mongodb.net/userdb?retryWrites=true&w=majority');
+    await mongoose.connect(uri);
 })().catch(err=>console.log(err));
 
 
