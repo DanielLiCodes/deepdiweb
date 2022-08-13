@@ -9,6 +9,8 @@ import upload from './routes/upload';
 import { EXAMPLES, EXAMPLE_NAMES } from './examples/examples';
 import disassemble, { disassemble_bytes, disassemble_retdec, disassemble_retdec_func } from './routes/disassemble';
 import { createDocument } from './database';
+import { registerUser } from './user';
+// import { createDocument2, registerNewUser } from './user';
 var timeout = require('connect-timeout')
 
 const router = Router();
@@ -52,7 +54,11 @@ router.get('/api/masters/:short_name/clone', async (req, res) => {
         res.status(400).send(`Unable to copy clone ${short_name} (does that example exist?)`);
     }
 });
+
 router.post('/api/disassembleretdecranges' , disassemble_retdec_func)
+// router.post('/api/register', registerNewUser)
+// router.post('/api/register2', createDocument2)
+router.post('/api/register', registerUser)
 router.post('/api/disassembleretdec' , disassemble_retdec);
 router.post('/api/upload', upload);
 router.get('/api/load', load);

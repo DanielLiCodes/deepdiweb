@@ -1,12 +1,15 @@
 
 const bcrypt = require("bcrypt");
-// import { Request, Response } from 'express';
+import { Request, Response } from 'express';
 const jwt = require("jsonwebtoken");
 import mongoose from 'mongoose';
 var Schema = mongoose.Schema;
+import axios from 'axios/index'
+const API_ROOT_URL = process.env.API_ROOT_URL
+const odaAxios = axios.create({ baseURL: API_ROOT_URL })
 
 var UserSchema = new Schema({
-    username: { type: String, required: true, index: { unique: true } },
+    email: { type: String, required: true, index: { unique: true } },
     password: { type: String, required: true }
 }).pre("save", function(this: any, next: any){
     var user = this;
@@ -35,8 +38,27 @@ UserSchema.methods.comparePassword = function(candidatePassword:any, cb:any) {
 
 const User = mongoose.model("User", UserSchema);
 
+//create async function to create a new user and export it
+export async function registerUser(req: Request, res: Response) {
+    const user = new User({email: req.body.params.email, password: req.body.params.password});
+    try {
+        await user.save();
+        res.send(user);
+    } catch (e) {
+        res.status(400).send(e);
+    }
+}
 
-module.exports = User;
+export async function registerNewUsers (email:any, password:any) {
+    await odaAxios.post('/odaweb/api/register', {
+      params: {
+        email: 'test',
+        password: 'HAHAHA'
+      }
+    })
+  }
+
+// module.exports = User;
 // mongoose.connect(uri)
 
 // var testUser = new User({
