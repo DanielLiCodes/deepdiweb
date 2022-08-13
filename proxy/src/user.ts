@@ -29,8 +29,8 @@ var UserSchema = new Schema({
 
     // user.password = bcrypt.hashSync(user.password, 10);
 });
-UserSchema.methods.comparePassword = function(candidatePassword:any, cb:any) {
-    bcrypt.compare(candidatePassword, this.password, function(err:any, isMatch:any) {
+async function comparePassword(user:any, candidatePassword:any, cb:any) {
+    bcrypt.compare(candidatePassword, user.password, function(err:any, isMatch:any) {
         if (err) return cb(err);
         cb(null, isMatch);
     });
@@ -49,14 +49,45 @@ export async function registerUser(req: Request, res: Response) {
     }
 }
 
-export async function registerNewUsers (email:any, password:any) {
-    await odaAxios.post('/odaweb/api/register', {
-      params: {
-        email: 'test',
-        password: 'HAHAHA'
-      }
-    })
-  }
+//function to check if email is in database already
+export async function checkEmail(email: any) {
+    try {
+        const user = await User.findOne({email: email});
+        if (user) {
+            return true
+        } else {
+            return false
+        }
+    } catch (e) {
+        console.log(e)
+    }
+}
+
+//login function taking in email and pw as params for request
+export async function loginUser(req: Request, res: Response) {
+    const user = await User.findOne({email: req.body.params.email});
+    if (!user) {
+        res.status(401).send({error: "Email not found"});
+    }else{
+        try {
+            await comparePassword(user, req.body.params.password, (err:any, isMatch:any) => {
+                if (err) return res.status(401).send({error: "Password incorrect"});
+                if (isMatch) {
+                    const token = jwt.sign({email: user.email}, "HAHAHAHAHA", {expiresIn: "3h"});
+                    res.send({token: token, user: user});
+                } else {
+                    res.status(401).send({error: "Password incorrect"});
+                }
+            });
+                // res.send(user);
+        } catch (e) {
+            console.log(e)
+            res.status(401).send({error: "Password incorrect"});
+        }
+    }
+}
+
+
 
 // module.exports = User;
 // mongoose.connect(uri)

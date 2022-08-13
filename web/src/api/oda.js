@@ -17,6 +17,25 @@ function error (e) {
   bus.$emit(API_ERROR, e)
   throw e
 }
+
+export async function login (email, password) {
+  await odaAxios.post('/odaweb/api/login', {
+    params: {
+      email: email,
+      password: password
+    }
+  })
+}
+
+export async function registerNewUsers (email, password) {
+  await odaAxios.post('/odaweb/api/register', {
+    params: {
+      email: email,
+      password: password
+    }
+  })
+}
+
 export async function loadOdbFiletoDatabase (odbfile, shortName) {
   try {
     const response = await odaAxios.post('/odaweb/api/createdocument', {
@@ -57,7 +76,6 @@ export async function disassembleByRetdec (shortName) {
     error({ e, message: 'disasem by retdec' })
   }
 }
-
 export async function disassembleByRetdecFuncRanges (shortName, func) {
   try {
     const response = await odaAxios.post('/odaweb/api/disassembleretdecranges', {
