@@ -277,8 +277,18 @@ export async function createStructDefinedData ({ commit, state, dispatch }, { ad
   // dispatch('clearDisplayUnits', { addr: addr })
 }
 
+export function generateFuncsDict (functions) {
+  const func = {}
+  for (const [key, value] of Object.entries(functions)) {
+    value.cmd_vmas.forEach((val) => {
+      func[val] = functions[key]
+    })
+  }
+  return func
+}
+
 export async function upsertFunction ({ commit, state }, { vma, name, retval, args }) {
-  const f = _.find(state.functions, { vma: vma })
+  const f = state.funcs[vma]
   if (f) {
     await api.updateFunction(vma, name, retval, args)
   } else {

@@ -118,7 +118,9 @@ const dbProject = new mongoose.Schema({
                 vma:Number,
                 vma_start:Number,
                 vma_end:Number,
-                cmd_vmas: [Number]
+                cmd_vmas: [Number],
+                retval: String, 
+                args: String
             }]
             // strings: [{
             //     addr:Number, 
@@ -154,7 +156,34 @@ export async function get_database_project (short_name: string) {
     
 
 }
+export async function updateFunction (req: Request, res: Response) {
+    console.log("HERE!")
+    const document = await odbFile.findOne({short_name: req.body.short_name})
+    if(document !== null) {
+        try{
+            if (document.odbFile_data && document.odbFile_data.disassembly_data) {
+                const functions = document.odbFile_data.disassembly_data.functions
+                const vma_to_edit =  req.body.vma
+                for (const ele of functions) {
+                    if(ele.cmd_vmas.indexOf(vma_to_edit) !== -1){
+                        ele.retval = req.body.retval
+                        ele.args = req.body.args
+                        ele.name = req.body.name
+                        break
+                    }
+                }
+            }
+            await document.save() // TODO should change so that it does not save eaech update instead all at once
+        } catch(e) {
+            console.log(e)
+            res.send(400)
+        }
+        
+    }
 
+    res.send(200)
+    
+}
 interface ProjectInfo {
     project_name: string;
     file_path: string; // the full path to the saved location
