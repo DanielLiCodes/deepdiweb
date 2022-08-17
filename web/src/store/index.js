@@ -190,17 +190,19 @@ export default new Vuex.Store({
     },
 
     [types.UPDATE_FUNCTION] (state, { vma, name, retval, args }) {
-      const index = _.findIndex(state.functions, { vma: vma })
-      if (index === -1) {
+      const func = state.funcs[vma]
+      if (!func) {
         console.log('UPDATE_FUNCTION creating', vma, name)
-        state.functions.push({ vma, name, retval, args })
+        state.functions['0x' + vma.toString(16)] = { vma, name, retval, args }
+        state.funcs = actions.generateFuncsDict(state.functions)
       } else {
-        const f = state.functions[index]
         console.log('UPDATE_FUNCTION updating', vma, name)
-        f.name = name
-        f.retval = retval
-        f.args = args
-        Vue.set(state.functions, index, f)
+        func.name = name
+        func.retval = retval
+        func.args = args
+        // Vue.set(state.funcs, index, f)
+        state.functions['0x' + vma.toString(16)] = func
+        state.funcs = actions.generateFuncsDict(state.functions)
       }
 
       const symbol = _.find(state.symbols, { vma: vma })
