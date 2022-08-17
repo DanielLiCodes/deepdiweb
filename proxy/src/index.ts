@@ -6,7 +6,7 @@ import path from 'path';
 import router from './routes';
 import mongoose from 'mongoose';
 const server = express();
-import uri from './login'
+import {uri} from './login'
 
 server.use((req, res, next) => {
     console.log(`[${(new Date()).toISOString()}] ${req.method} ${req.url} (${res.statusCode})`);
@@ -14,9 +14,9 @@ server.use((req, res, next) => {
 });
 
 (async()=>{
+    console.log(uri)
     await mongoose.connect(uri);
 })().catch(err=>console.log(err));
-
 
 server.use(express.json({limit: '5mb'}));
 server.use(fileUpload({
@@ -32,3 +32,4 @@ server.use('/odaweb/', router);
 server.listen(8001, () => {
     console.log('Server is ready to accept requests!');
 }); 
+

@@ -41,7 +41,7 @@
                 type="text"
                 name="name"
                 class="form-control"
-                placeholder="Username"
+                placeholder="Username/Email"
                 required
                 autofocus
               >
@@ -120,6 +120,8 @@
 
 <script>
 import _ from 'lodash'
+import * as api from '../../api/oda'
+import router from '../../router'
 
 export default {
   data () {
@@ -129,17 +131,43 @@ export default {
       password_error: null
     }
   },
-  methods: {
-    login () {
-      this.$store.dispatch('login', {
-        username: this.username,
-        password: this.password
-      }).then(() => {
-        this.$router.push('/')
-      }).catch((e) => {
-        this.password_error = _.get(e, 'response.data.non_field_errors[0]')
-      })
+  async mounted() {
+    try{
+      if(!localStorage.token){
+        return
+      }
+      await api.validate(localStorage.token);
+      this.$router.push('/user/profile')
+    } catch(e) {
+      console.log(e)
     }
+  },
+  methods: {
+    async login() {
+      if(!this.username || !this.password) {
+        this.password_error = 'Please fill in all fields'
+        return
+      }
+      this.password_error = null
+      const resp = await api.login(this.username, this.password)
+      localStorage.token = resp;
+      const userData = await api.validate(resp);
+      router.push('/user/profile')
+    }
+    // async login() {
+    //   const resp = await api.validate('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImRsaTEzN0B1Y3IuZWR1IiwiaWF0IjoxNjYwNzA5OTMzLCJleHAiOjE2NjA3MDk5Mzh9.5K0DkaTWZ1InMfo7DYVZmWXdQ7VOdQkJLCnC6b16gZU')
+    //   console.log(resp)
+    // }
+    // login () {
+    //   this.$store.dispatch('login', {
+    //     username: this.username,
+    //     password: this.password
+    //   }).then(() => {
+    //     this.$router.push('/')
+    //   }).catch((e) => {
+    //     this.password_error = _.get(e, 'response.data.non_field_errors[0]')
+    //   })
+    // }
   }
 }
 </script>

@@ -148,7 +148,7 @@
           <button
             type="submit"
             class="btn btn-success"
-            @click="signup"
+            @click="register"
           >
             <i class="fa fa-user-plus" /> Register
           </button>
@@ -160,8 +160,9 @@
 
 <script>
 import * as auth from '../../api/auth'
-import _ from 'lodash'
-
+import * as api from '../../api/oda'
+// import { checkEmail, checkUsername } from '../../../../proxy/src/user'
+// import { checkEmail, checkUsername } from '../../../../../proxy/src/user'
 export default {
   data () {
     return {
@@ -178,7 +179,43 @@ export default {
 
     }
   },
+  async mounted() {
+    try{
+      console.log("token" + localStorage.token)
+      if(!localStorage.token){
+        return;
+      }
+      await api.validate(localStorage.token);
+      this.$router.push('/user/profile')
+    } catch(e) {
+      console.log(e)
+    }
+  },
   methods: {
+    async register() {
+      if(!this.email || !this.username || !this.password1) {
+        this.username_error = 'Please fill in all fields'
+        return
+      }
+      if(this.password1 !== this.password2) {
+        this.password_error = 'Passwords do not match'
+        return
+      }
+      // if(await checkEmail(this.email)) {
+      //   this.email_error = 'Email already in use'
+      //   return
+      // }
+      // if(await checkUsername(this.username)) {
+      //   this.username_error = 'Username already in use'
+      //   return
+      // }
+      await api.registerNewUsers(this.username, this.email, this.password1);
+      const resp = await api.login(this.email, this.password1)
+      localStorage.token = resp;
+      this.$router.push('/user/profile')
+    },
+
+
     signup () {
       auth.signup(this.username, this.email, this.password1, this.password2).then((e) => {
         this.email_error = null

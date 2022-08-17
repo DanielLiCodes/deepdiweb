@@ -3,10 +3,11 @@
     <section class="jumbotron text-center">
       <div class="container">
         <h1 class="jumbotron-heading">
-          <i class="fa fa-user-circle" /> {{ user.username }}
+          <!-- <i class="fa fa-user-circle" /> {{ user.username }} -->
         </h1>
         <p>
-          {{ user.email }}
+          <!-- {{ user.email }} -->
+          {{userEmail}}
         </p>
         <p class="lead text-muted">
           You can view and delete your uploaded documents, and manage permissions from your outstanding files
@@ -22,7 +23,7 @@
         <th>Default Permission Level</th>
         <th />
       </thead>
-      <tr v-for="doc in odaMasters">
+      <!-- <tr v-for="doc in odaMasters">
         <td>{{ doc.short_name }}</td>
         <td>
           <router-link :to="{ name: 'Disassembler', params: { shortName: doc.short_name }}">
@@ -39,7 +40,7 @@
             <i class="fa fa-trash" />
           </button>
         </td>
-      </tr>
+      </tr> -->
     </table>
   </div>
 </template>
@@ -49,7 +50,7 @@ import * as api from '../../api/oda'
 export default {
   data () {
     return {
-      odaMasters: null
+      userEmail: null,
     }
   },
   computed: {
@@ -57,11 +58,19 @@ export default {
       return this.$store.state.user
     }
   },
-  async created () {
-    if (!this.$store.getters.isActiveUser) {
-      this.$router.push('/')
+  async mounted () {
+    console.log("in profile")
+    try{
+      const temp = await api.validate(localStorage.token)
+      this.userEmail = temp.decoded.email
+      console.log(temp)
+    } catch (e) {
+      this.$router.push('/login')
     }
-    this.odaMasters = await api.listMyDocuments()
+    // if (!localStorage.token || !temp.decoded) {
+    //   this.$router.push('/login')
+    // }
+    console.log(this.odaMasters)
   },
   methods: {
     async deleteDocument (doc) {

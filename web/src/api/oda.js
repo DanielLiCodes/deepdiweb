@@ -18,22 +18,89 @@ function error (e) {
   throw e
 }
 
-export async function login (email, password) {
-  await odaAxios.post('/odaweb/api/login', {
-    params: {
-      email: email,
-      password: password
-    }
-  })
+export async function validate (token) {
+  try {
+    const { data } = await odaAxios.post('/odaweb/api/validateToken', {
+      params: {
+        token: token
+      }
+    })
+    return data
+  } catch (e) {
+    error({ e, message: e.response.data.error.message })
+  }
 }
 
-export async function registerNewUsers (email, password) {
-  await odaAxios.post('/odaweb/api/register', {
-    params: {
-      email: email,
-      password: password
-    }
-  })
+export async function login (email, password) {
+  try {
+    const resp = await odaAxios.post('/odaweb/api/login', {
+      params: {
+        email: email,
+        password: password
+      }
+    })
+    return resp.data.token
+  } catch (e) {
+    console.log(e)
+    error({ e, message: e.response.data.error })
+    return false
+  }
+  // const resp = await odaAxios.post('/odaweb/api/login', {
+  //   params: {
+  //     email: email,
+  //     password: password
+  //   }
+  // })
+  // console.log(resp.status)
+}
+
+// export async function checkEmail (email) {
+//   try {
+//     const user = await User.findOne({ email: email })
+//     if (user) {
+//       return true
+//     } else {
+//       return false
+//     }
+//   } catch (e) {
+//     console.log(e)
+//   }
+// }
+
+// export async function checkUsername (username) {
+//   try {
+//     const user = await User.findOne({ username: username })
+//     if (user) {
+//       return true
+//     } else {
+//       return false
+//     }
+//   } catch (e) {
+//     console.log(e)
+//   }
+// }
+
+export async function registerNewUsers (username, email, password) {
+  try {
+    await odaAxios.post('/odaweb/api/register', {
+      params: {
+        username: username,
+        email: email,
+        password: password
+      }
+    })
+    // return await login(email, password)
+  } catch (e) {
+    error({ e, message: e.response.data })
+  }
+  // const resp = await odaAxios.post('/odaweb/api/register', {
+  //   params: {
+  //     username: username,
+  //     email: email,
+  //     password: password
+  //   }
+  // })
+  // console.log(resp)
 }
 
 export async function loadOdbFiletoDatabase (odbfile, shortName) {
