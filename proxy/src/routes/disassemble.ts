@@ -4,15 +4,12 @@ import { Request, Response } from 'express';
 import { AxiosError } from 'axios';
 import { spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
-
 const readline = require('readline');
 const cs = require('@alexaltea/capstone-js/dist/capstone.min.js');
 
 
 
 export default async function disassemble(req: Request, res: Response) {
-
-   
 
     const short_name = req.params.short_name as string;
     if (!short_name) {
