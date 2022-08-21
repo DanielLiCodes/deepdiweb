@@ -129,18 +129,30 @@ const dbProject = new mongoose.Schema({
         }
     }, 
     short_name: String,
+    email: String,
 
 })
 const odbFile = mongoose.model('odbfile', dbProject)
-
+export async function get_projects_from_email (req: Request, res: Response) {
+    const email = req.body.params.email
+    try {
+        const data = await odbFile.find({email:email})
+        console.log(data)
+        res.status(200).send(data)
+    } catch (e) {
+        console.log(`error when getting projects ${e}`)
+        res.status(400)
+    }
+}
 export async function createDocument (req: Request, res: Response) {
     const odbfile = req.body.params.odbfile
+    // TODO Check if shortname alr exists
     try {
         // await odbFile.create({odbFile_data: odbfile, short_name: req.body.params.short_name}, (err: any) => {
         //     console.log("err is "+err)
         // })
         // console.log(odbfile)
-        const databaseODB = new odbFile({odbFile_data: odbfile, short_name: req.body.params.short_name})
+        const databaseODB = new odbFile({odbFile_data: odbfile, short_name: req.body.params.short_name, email: req.body.params.email})
         await databaseODB.save();
         res.send(200)
     } 

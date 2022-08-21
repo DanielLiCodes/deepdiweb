@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { UPLOAD_DIR } from './config';
-import { add_project, updateFunction } from './database';
+import { add_project, updateFunction, get_projects_from_email } from './database';
 import { promises as fs } from 'fs';
 import { generate_id } from './util';
 import load from './routes/load';
@@ -68,5 +68,6 @@ router.post('/api/disassemble_bytes', disassemble_bytes);
 router.post('/api/:short_name/disassemble', disassemble);
 router.post('/api/createdocument', createDocument);
 router.patch('/api/functions/0/', updateFunction)
+router.post('/api/getprojects', get_projects_from_email)
 // router.post('/odaweb/api/displayunits/1/makeFunction/')
 export default router;

@@ -103,17 +103,30 @@ export async function registerNewUsers (username, email, password) {
   // console.log(resp)
 }
 
-export async function loadOdbFiletoDatabase (odbfile, shortName) {
+export async function loadOdbFiletoDatabase (odbfile, shortName, email) {
   try {
     const response = await odaAxios.post('/odaweb/api/createdocument', {
       params: {
         odbfile: odbfile,
-        short_name: shortName
+        short_name: shortName,
+        email: email
       }
     })
     return response.data
   } catch (e) {
     error({ e, message: `loading odb file ${store.state.shortName} to database` })
+  }
+}
+export async function getProjectsFromEmail (email) {
+  try {
+    const response = await odaAxios.post('/odaweb/api/getprojects', {
+      params: {
+        email: email
+      }
+    })
+    return response.data
+  } catch (e) {
+    error({ e, message: `Error getting files for ${email}` })
   }
 }
 export async function loadOdbFile () {

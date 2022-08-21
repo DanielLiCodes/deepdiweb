@@ -22,7 +22,7 @@
           <b-form-file
             ref="fileinput"
             v-model="file"
-            choose-label="Choose File ..."
+            choose-label="Choose File"
             @change="fileSelected"
           />
         </div>

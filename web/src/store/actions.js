@@ -167,7 +167,14 @@ export async function loadOdbFile ({ commit, state }) {
       binaryBytes: Array.from(state.binaryBytes),
       functions: functionsParsed
     }
-    await api.loadOdbFiletoDatabase(odbFile, state.shortName)
+    let email
+    try {
+      const temp = await api.validate(localStorage.token)
+      email = temp.decoded.email
+    } catch (e) {
+      console.log('expired lulw')
+    }
+    await api.loadOdbFiletoDatabase(odbFile, state.shortName, email)
   }
 
   bus.$emit('doneLoading', 'done loading file')

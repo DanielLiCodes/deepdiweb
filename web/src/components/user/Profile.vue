@@ -23,15 +23,15 @@
         <th>Default Permission Level</th>
         <th />
       </thead>
-      <!-- <tr v-for="doc in odaMasters">
-        <td>{{ doc.short_name }}</td>
+      <tr v-for="ele in data">
+        <td>{{ ele.short_name }}</td>
         <td>
-          <router-link :to="{ name: 'Disassembler', params: { shortName: doc.short_name }}">
-            {{ doc.project_name }}
+          <router-link :to="{ name: 'Disassembler', params: { shortName: ele.short_name }}">
+            {{ ele.odbFile_data.project_name }}
           </router-link>
         </td>
-        <td>{{ doc.creation_date }}</td>
-        <td>{{ doc.default_permission_level.name }}</td>
+        <td>{{ "LOL NO CREATION DATE" }}</td>
+        <td>{{ "WUTS A PERMISSION LVL" }}</td>
         <td style="text-align: right;">
           <button
             class="btn btn-danger"
@@ -40,7 +40,7 @@
             <i class="fa fa-trash" />
           </button>
         </td>
-      </tr> -->
+      </tr>
     </table>
   </div>
 </template>
@@ -51,6 +51,7 @@ export default {
   data () {
     return {
       userEmail: null,
+      data: null
     }
   },
   computed: {
@@ -60,10 +61,12 @@ export default {
   },
   async mounted () {
     console.log("in profile")
-    try{
+    try {
       const temp = await api.validate(localStorage.token)
       this.userEmail = temp.decoded.email
-      console.log(temp)
+      console.log(this.userEmail)
+      const data = await api.getProjectsFromEmail(this.userEmail)
+      this.data = data
     } catch (e) {
       this.$router.push('/login')
     }
