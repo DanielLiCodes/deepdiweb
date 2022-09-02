@@ -489,6 +489,18 @@ export async function makeComment (comment, vma) {
   }
 }
 
+export async function deleteProject (email, shortName) {
+  try {
+    const response = await odaAxios.post('/odaweb/api/delete', {
+      short_name: shortName,
+      email: email
+    })
+    return response.data
+  } catch (e) {
+    error({ e, message: 'adding a comment' })
+  }
+}
+
 // export async function loadOperations() {
 //   try {
 //     const response = await odaAxios.get('/odaweb/api/operations/', {

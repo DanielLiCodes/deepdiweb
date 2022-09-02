@@ -35,7 +35,7 @@
         <td style="text-align: right;">
           <button
             class="btn btn-danger"
-            @click="deleteDocument(doc)"
+            @click="deleteDocument(userEmail, ele.short_name)"
           >
             <i class="fa fa-trash" />
           </button>
@@ -76,8 +76,8 @@ export default {
     console.log(this.odaMasters)
   },
   methods: {
-    async deleteDocument (doc) {
-      await api.deleteDocument(doc.short_name)
+    async deleteDocument (userEmail, shortName) {
+      await api.deleteProject(userEmail, shortName)
       this.odaMasters = await api.listMyDocuments()
     }
   }

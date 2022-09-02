@@ -31,9 +31,9 @@ export function delete_project(key: string): boolean {
     return Projects.delete(key);
 }
 
-export function update_project(key: string, data: any) {
-    return data.info = key
-}
+// export function update_project(key: string, data: any) {
+//     return data.info = key
+// }
 
 
 
@@ -137,7 +137,6 @@ export async function get_projects_from_email (req: Request, res: Response) {
     const email = req.body.params.email
     try {
         const data = await odbFile.find({email:email})
-        console.log(data)
         res.status(200).send(data)
     } catch (e) {
         console.log(`error when getting projects ${e}`)
@@ -168,8 +167,17 @@ export async function get_database_project (short_name: string) {
     
 
 }
+export async function delete_database_project (req: Request, res: Response) {
+    try{
+        console.log("delete TODO")
+        res.send(200)
+    }
+    catch(e){
+        console.log(e)
+        res.send(400)
+    }
+}
 export async function updateFunction (req: Request, res: Response) {
-    console.log("HERE!")
     const document = await odbFile.findOne({short_name: req.body.short_name})
     if(document !== null) {
         try{

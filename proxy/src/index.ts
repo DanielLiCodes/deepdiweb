@@ -18,7 +18,7 @@ server.use((req, res, next) => {
     await mongoose.connect(uri);
 })().catch(err=>console.log(err));
 
-server.use(express.json({limit: '5mb'}));
+server.use(express.json({limit: '20mb'}));
 server.use(fileUpload({
     safeFileNames: true,
     useTempFiles: true,

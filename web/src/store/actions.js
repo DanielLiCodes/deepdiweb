@@ -159,7 +159,7 @@ export async function loadOdbFile ({ commit, state }) {
   // }
 
   // realtime = new Realtime('http://localhost:8080')
-  if (odbFile.disassembely_data === undefined) {
+  if (odbFile.disassembly_data === undefined) {
     odbFile.disassembly_data = {
       data: data,
       transfer: transfer,
@@ -171,10 +171,12 @@ export async function loadOdbFile ({ commit, state }) {
     try {
       const temp = await api.validate(localStorage.token)
       email = temp.decoded.email
+      if (odbFile.isexe) {
+        await api.loadOdbFiletoDatabase(odbFile, state.shortName, email)
+      }
     } catch (e) {
       console.log('expired lulw')
     }
-    await api.loadOdbFiletoDatabase(odbFile, state.shortName, email)
   }
 
   bus.$emit('doneLoading', 'done loading file')

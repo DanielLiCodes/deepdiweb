@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { UPLOAD_DIR } from './config';
-import { add_project, updateFunction, get_projects_from_email } from './database';
+import { add_project, updateFunction, get_projects_from_email, delete_database_project } from './database';
 import { promises as fs } from 'fs';
 import { generate_id } from './util';
 import load from './routes/load';
@@ -62,6 +62,7 @@ router.post('/api/validateToken', validateToken)
 router.post('/api/login', loginUser)
 router.post('/api/register', registerUser)
 router.post('/api/disassembleretdec' , disassemble_retdec);
+router.post('/api/delete' , delete_database_project);
 router.post('/api/upload', upload);
 router.get('/api/load', load);
 router.post('/api/disassemble_bytes', disassemble_bytes);
