@@ -12,12 +12,12 @@ export default async function load(req: Request, res: Response) {
     }
 
     const project = get_project(short_name); // HERE should call to mongodb to check if exists
-
+    console.log("HAHAHA")
     if (!project) {
         res.status(400).send(`${short_name} does not exist (it could have expired)`);
         return;
     }
-
+    console.log("?")
     let binary_bytes;
     try {
         binary_bytes = await fs.readFile(project.file_path);

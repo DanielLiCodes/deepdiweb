@@ -180,6 +180,23 @@ export async function loadOdbFile ({ commit, state }) {
   }
 
   bus.$emit('doneLoading', 'done loading file')
+  if (odbFile.disassembly_data === undefined && odbFile.isexe) {
+    odbFile.disassembly_data = {
+      data: data,
+      transfer: transfer,
+      base_add: baseAdd === undefined ? 0 : baseAdd,
+      binaryBytes: Array.from(state.binaryBytes),
+      functions: functionsParsed
+    }
+    let email
+    try {
+      const temp = await api.validate(localStorage.token)
+      email = temp.decoded.email
+      await api.loadOdbFiletoDatabase(odbFile, state.shortName, email)
+    } catch (e) {
+      console.log('expired lulw')
+    }
+  }
 }
 
 export async function disassembleByRetdecFunction ({ commit, state }, func) {

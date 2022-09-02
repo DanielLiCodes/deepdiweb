@@ -31,10 +31,10 @@ export default new Router({
       path: '/user/profile',
       name: 'UserProfile',
       component: Profile
+    },
+    {
+      path: '*',
+      redirect: '/odaweb/test'
     }
-    // {
-    //   path: '*',
-    //   redirect: '/odaweb/test'
-    // }
   ]
 })

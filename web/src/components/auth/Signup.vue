@@ -150,8 +150,12 @@
             class="btn btn-success"
             @click="register"
           >
+          
             <i class="fa fa-user-plus" /> Register
           </button>
+          <router-link to="login">
+            Log in instead?
+          </router-link>
         </div>
       </div>
     </div>

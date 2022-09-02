@@ -59,24 +59,29 @@
           </b-dropdown-item>
         </b-nav-item-dropdown>
 
-        <!-- <b-nav-item-dropdown
-          v-if="isActiveUser"
-          right
-        > -->
+        <b-nav-item-dropdown v-if="isUser"> 
         <!-- Using button-content slot -->
-        <!-- <template slot="button-content">
+        <template slot="button-content">
             <em>User <i class="fa fa-user" /></em>
           </template>
           <b-dropdown-item disabled>
             {{ username }}
           </b-dropdown-item>
-          <b-dropdown-item href="#/user/profile">
+          <b-dropdown-item @click="goToProfile">
             Profile
           </b-dropdown-item>
-          <b-dropdown-item @click="logout">
+          <b-dropdown-item @click="logOut">
             Signout
           </b-dropdown-item>
-        </b-nav-item-dropdown> -->
+        </b-nav-item-dropdown>
+        <b-nav-item-dropdown text="Login/Register" v-else>
+          <b-dropdown-item @click="logIn">
+            Sign in
+          </b-dropdown-item>
+          <b-dropdown-item @click="register">
+            Register
+          </b-dropdown-item>
+        </b-nav-item-dropdown>
 
         <!-- <b-button-group>-->
 
@@ -115,12 +120,19 @@
 // import ColorHash from 'color-hash'
 // import { bus, SHOW_SHARING_MODAL } from '../bus'
 // import * as auth from '../api/auth'
+import * as api from '../api/oda'
+import { login } from '../store/actions'
 
 export default {
   name: 'NavigationBar',
   data () {
     return {
+      isUser: false,
+      username: 'user',
     }
+  },
+  async mounted () {
+    this.isUser = await this.verifyUser()
   },
   computed: {
     projectName () {
@@ -142,6 +154,33 @@ export default {
     }
   },
   methods: {
+    async goToProfile () {
+      this.$router.push('/user/profile')
+    },
+    async logOut() {
+      localStorage.clear();
+      this.isUser=false;
+      this.$router.push('/')
+    },
+    async logIn() {
+      this.$router.push('/login')
+    },
+    async register() {
+      this.$router.push('/signup')
+    },
+    async verifyUser() {
+      if(!localStorage.token){
+        return false;
+      }
+      try {
+        const temp = await api.validate(localStorage.token);
+        this.username = temp.decoded.email
+        return true;
+      } catch (e) {
+        console.log(e)
+        return false;
+      }
+    }
     // showSharingDialog () {
     //   bus.$emit(SHOW_SHARING_MODAL)
     // },

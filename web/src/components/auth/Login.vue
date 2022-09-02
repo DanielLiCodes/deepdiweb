@@ -109,8 +109,8 @@
           >
             <i class="fa fa-sign-in" /> Login
           </button>
-          <router-link to="PasswordReset">
-            Forgot Your Password?
+          <router-link to="signup">
+            Register instead?
           </router-link>
         </div>
       </div>

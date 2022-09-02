@@ -27,7 +27,7 @@ export async function validate (token) {
     })
     return data
   } catch (e) {
-    error({ e, message: e.response.data.error.message })
+    // error({ e, message: e.response.data.error.message })
   }
 }
 
