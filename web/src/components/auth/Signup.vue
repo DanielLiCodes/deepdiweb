@@ -190,6 +190,7 @@ export default {
         return;
       }
       await api.validate(localStorage.token);
+      this.username = temp.decoded.email
       this.$router.push('/user/profile')
     } catch(e) {
       console.log(e)

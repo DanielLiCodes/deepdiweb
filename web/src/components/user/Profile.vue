@@ -30,8 +30,8 @@
             {{ ele.odbFile_data.project_name }}
           </router-link>
         </td>
-        <td>{{ "LOL NO CREATION DATE" }}</td>
-        <td>{{ "WUTS A PERMISSION LVL" }}</td>
+        <td>{{ "N/A" }}</td>
+        <td>{{ "N/A" }}</td>
         <td style="text-align: right;">
           <button
             class="btn btn-danger"

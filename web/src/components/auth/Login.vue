@@ -136,10 +136,11 @@ export default {
       if(!localStorage.token){
         return
       }
-      await api.validate(localStorage.token);
+      const temp = await api.validate(localStorage.token);
+      let username = temp.decoded.email
       this.$router.push('/user/profile')
     } catch(e) {
-      console.log(e)
+      console.log(e)  
     }
   },
   methods: {
