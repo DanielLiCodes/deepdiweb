@@ -1,14 +1,12 @@
-import Vue from 'vue'
-import Router from 'vue-router'
+// import Vue from 'vue'
+import { createRouter } from 'vue-router'
 import Disassembler from '@/components/Disassembler'
 import Login from '@/components/auth/Login'
 import Signup from '@/components/auth/Signup'
 import PasswordReset from '@/components/auth/PasswordReset'
 import Profile from '@/components/user/Profile'
 
-Vue.use(Router)
-
-export default new Router({
+const router = createRouter({
   mode: 'history',
   routes: [
     {
@@ -31,10 +29,7 @@ export default new Router({
       path: '/user/profile',
       name: 'UserProfile',
       component: Profile
-    },
-    {
-      path: '*',
-      redirect: '/odaweb/test'
     }
   ]
 })
+export default router

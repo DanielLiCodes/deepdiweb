@@ -50,7 +50,7 @@
             class="clickable"
             @click="setSection(section)"
           >
-            0x{{ section.vma | hex }}
+            0x{{ toHex(section.vma) }}
           </td>
 
           <td align="left">
@@ -109,6 +109,18 @@ export default {
   },
   computed: mapState(['projectName', 'binary', 'sections']),
   methods: {
+    toHex (value) {
+      if (value !== 0 && !value) return ''
+      const stringValue = value.toString(16)
+      let s = '000000000' + stringValue
+      let bytes = 8
+      if (stringValue.length > 8) {
+        s = '000000000000000000' + stringValue
+        bytes = 16
+      }
+
+      return s.substr(s.length - bytes)
+    },
     getFlagText: function (flag) {
       const s = flag.split('_')
       return s[s.length - 1]

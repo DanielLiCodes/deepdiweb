@@ -8,7 +8,7 @@
       @ok="ok"
       @hidden="onHidden"
     >
-      <h4>Updating a function at address {{ address | hex }}</h4>
+      <h4>Updating a function at address {{ toHex(address) }}</h4>
       <div class="form-group">
         <label for="functionName">Function Name</label>
         <input
@@ -98,6 +98,18 @@ export default {
       }) */
   },
   methods: {
+    toHex (value) {
+      if (value !== 0 && !value) return ''
+      const stringValue = value.toString(16)
+      let s = '000000000' + stringValue
+      let bytes = 8
+      if (stringValue.length > 8) {
+        s = '000000000000000000' + stringValue
+        bytes = 16
+      }
+
+      return s.substr(s.length - bytes)
+    },
     onHidden () {
       bus.$emit(MODAL_HIDDEN)
     },

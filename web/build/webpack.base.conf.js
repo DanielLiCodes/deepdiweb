@@ -25,6 +25,7 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.vue', '.json'],
     alias: {
+      vue: '@vue/compat',
       vue$: 'vue/dist/vue.esm.js',
       '@': resolve('src'),
       handlebars: 'handlebars/dist/handlebars.min.js'
@@ -35,8 +36,7 @@ module.exports = {
     rules: [
       {
         test: /\.vue$/,
-        loader: 'vue-loader',
-        options: vueLoaderConfig
+        loader: 'vue-loader'
       },
       {
         test: /\.js$/,

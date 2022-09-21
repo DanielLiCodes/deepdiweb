@@ -515,16 +515,16 @@ export async function deleteProject (email, shortName) {
 //   }
 // }
 
-// export async function decompiled(addr) {
-//   const response = await odaAxios.get('/odaweb/api/decompiler', {
-//     params: {
-//       short_name: store.state.shortName,
-//       revision: store.state.revision,
-//       addr: addr
-//     }
-//   })
-//   return response.data
-// }
+export async function decompiled (addr) {
+  const response = await odaAxios.get('/odaweb/api/decompiler', {
+    params: {
+      short_name: store.state.shortName,
+      revision: store.state.revision,
+      addr: addr
+    }
+  })
+  return response.data
+}
 
 // export async function setDefaultPermissionLevel(permissionLevel) {
 //   try {

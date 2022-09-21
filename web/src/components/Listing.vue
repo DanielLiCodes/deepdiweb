@@ -40,7 +40,7 @@
             <table>
               <tr v-if="!du.dummy">
                 <td>{{ du.sectionName }} </td>
-                <td>:{{ du.vma | hex }}</td>
+                <td>:{{ toHex(du.vma) }}</td>
                 <td
                   style="padding-left:8px;"
                   class="rawBytes"
@@ -126,7 +126,7 @@
         style="display:block;"
       >
         <h6 class="dropdown-header">
-          ODA Commands 0x{{ highlightedAddress | hex }} isCode: {{ highlightedDu.isCode }}
+          ODA Commands 0x{{ toHex(highlightedAddress) }} isCode: {{ highlightedDu.isCode }}
         </h6>
         <button
           class="dropdown-item listing-context-menu-item"
@@ -241,6 +241,19 @@ export default {
     }
   },
   computed: {
+    toHex (value) {
+      if (value !== 0 && !value) return ''
+      const stringValue = value.toString(16)
+      let s = '000000000' + stringValue
+      let bytes = 8
+      if (stringValue.length > 8) {
+        s = '000000000000000000' + stringValue
+        bytes = 16
+      }
+
+      return s.substr(s.length - bytes)
+    },
+
     renderedDus () {
       if (this.numLinesShown === 0) {
         return []

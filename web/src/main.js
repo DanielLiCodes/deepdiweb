@@ -1,6 +1,6 @@
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
-import Vue from 'vue'
+import { createApp } from 'vue'
 import App from './App'
 import router from './router'
 import BootstrapVue from 'bootstrap-vue'
@@ -14,20 +14,24 @@ import './utils/vue.hex'
 import 'font-awesome/css/font-awesome.min.css'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+// Vue.use(BootstrapVue)
+// Vue.use(Notifications)
+// Vue.use(VueHighlightJS)
 
-Vue.use(BootstrapVue)
-Vue.use(Notifications)
-Vue.use(VueHighlightJS)
+// Vue.config.productionTip = false
 
-Vue.config.productionTip = false
-
-const vm = new Vue({ // eslint-disable no-new
+const vm = createApp({ // eslint-disable no-new
   router,
   store,
   components: { App },
   template: '<App/>'
 })
-vm.$mount('#app')
+vm.mount('#app')
+vm.use(BootstrapVue)
+vm.use(Notifications)
+vm.use(VueHighlightJS)
+vm.config.productionTip = false
+// vm.$mount('#app')
 
 // auth.whoami().then((whoami) => {
 //   store.commit(types.UPDATE_USER, { user: whoami })

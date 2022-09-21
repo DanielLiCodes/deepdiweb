@@ -9,7 +9,7 @@
       @hidden="onHidden"
     >
       <div class="form-group">
-        <label for="commentInput">Comment On Address 0x{{ address | hex }}</label>
+        <label for="commentInput">Comment On Address 0x{{ toHex(address) }}</label>
         <input
           id="commentInput"
           ref="inputField"
@@ -53,6 +53,18 @@ export default {
     })
   },
   methods: {
+    toHex (value) {
+      if (value !== 0 && !value) return ''
+      const stringValue = value.toString(16)
+      let s = '000000000' + stringValue
+      let bytes = 8
+      if (stringValue.length > 8) {
+        s = '000000000000000000' + stringValue
+        bytes = 16
+      }
+
+      return s.substr(s.length - bytes)
+    },
     onHidden () {
       bus.$emit(MODAL_HIDDEN)
     },

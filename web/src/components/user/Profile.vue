@@ -78,7 +78,7 @@ export default {
   methods: {
     async deleteDocument (userEmail, shortName) {
       await api.deleteProject(userEmail, shortName)
-      this.odaMasters = await api.listMyDocuments()
+      this.odaMasters = await api.getProjectsFromEmail(userEmail)
     }
   }
 }
